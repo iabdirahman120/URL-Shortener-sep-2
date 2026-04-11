@@ -2,12 +2,12 @@ import { Routes, Route } from 'react-router-dom'
 import Login from './pages/login' 
 import Register from './pages/register'
 import Dashboard from './pages/dashboard'
-
+import Forside from './pages/forside'
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<h1>Forside</h1>} />
+      <Route path="/" element={<Forside/>} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/dashboard" element={<Dashboard/>} />
