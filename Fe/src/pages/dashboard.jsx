@@ -12,7 +12,7 @@ function Dashboard() {
 
     useEffect(() => {
         const token = localStorage.getItem('token')
-        fetch('http://localhost:3000/api/urls/my-links', {
+        fetch('/api/urls/my-links', {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -26,7 +26,7 @@ function Dashboard() {
         e.preventDefault()
         const token = localStorage.getItem('token')
 
-        const response = await fetch('http://localhost:3000/api/urls/shorten', {
+        const response = await fetch('/api/urls/shorten', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -45,7 +45,7 @@ function Dashboard() {
     const handleDelete = async (id) => {
         const token = localStorage.getItem('token')
 
-        await fetch(`http://localhost:3000/api/urls/delete/${id}`, {
+        await fetch(`/api/urls/delete/${id}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`
