@@ -19,15 +19,20 @@ const navigate = useNavigate()
 const handleSubmit = async (e) => {
     e.preventDefault()
 
-    const response = await fetch('/api/auth/register', {
-        method:'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ navn: name, email, password })
-    })
+    try {
+        const response = await fetch('/api/auth/register', {
+            method:'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ navn: name, email, password })
+        })
 
-    const data = await response.json()
-    console.log(data)
-    navigate('/login')
+        const data = await response.json()
+        console.log(data)
+        navigate('/login')
+    } catch (err) {
+        console.error(err)
+        alert('Noget gik galt. Prøv igen.')
+    }
 }
 
     return (
