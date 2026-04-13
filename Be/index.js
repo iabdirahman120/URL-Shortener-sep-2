@@ -18,7 +18,7 @@ app.get('/', (req, res) => {
 
 const pool = require('./Db')
 
-app.get('/:short_code', async (req, res) => {
+app.get('/r/:short_code', async (req, res) => {
     const { short_code } = req.params
 
     try {

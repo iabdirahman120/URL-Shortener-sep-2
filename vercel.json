@@ -4,7 +4,7 @@
   "outputDirectory": "Fe/dist",
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/index" },
-    { "source": "/:short_code", "destination": "/api/index" },
+    { "source": "/r/:short_code", "destination": "/api/index" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

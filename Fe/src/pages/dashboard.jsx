@@ -96,7 +96,7 @@ function Dashboard() {
             {links.map((link) => (
                 <tr key={link.id} className="border-b">
                     <td className="py-2 w-1/4 text-left">{link.original_url}</td>
-                    <td className="py-2 w-1/4 text-left">localhost:3000/{link.short_code}</td>
+                    <td className="py-2 w-1/4 text-left">url-shortener-sep2.vercel.app/r/{link.short_code}</td>
                     <td className="py-2 w-1/4 text-left">{link.clicks}</td>
                     <td className="py-2 w-1/4 text-left">{link.expires_at ? new Date(link.expires_at).toLocaleDateString('da-DK'):'-'}</td>
                     <td className="py-2 w-16">
