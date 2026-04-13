@@ -10,7 +10,8 @@ router.post('/register', async (req, res) => { //opretter route til register end
     try {
 
         const hashedPassword = await bcrypt.hash(password, 10) //hashe password med bcrypt
-        await pool.query('INSERT INTO users (navn, email, password) VALUES ($1, $2, $3)', [navn, email, hashedPassword]) //indsætter ny bruger i database
+        await pool.query('INSERT INTO users (navn, email, password_hash) VALUES ($1, $2, $3)', [navn, email, hashedPassword])
+        //indsætter ny bruger i database
 
         res.status(201).json({ message: 'User registered successfully' }) //sender success besked tilbage til client
 
@@ -21,19 +22,20 @@ router.post('/register', async (req, res) => { //opretter route til register end
 })
 
 router.post('/login', async (req, res) => {
-    const {email, password} = req.body
+    const { email, password } = req.body
 
-    try{
+    try {
         const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]) //henter bruger fra database baseret på email
 
-        if(result.rows.length === 0) {
+        if (result.rows.length === 0) {
             return res.status(400).json({ message: 'Invalid email or password' }) //sender fejl besked hvis email ikke findes
 
         }
         const user = result.rows[0] //henter første række fra result som er brugeren
-        const passwordMatch = await bcrypt.compare(password, user.password) //sammenligner indtastet password med hashet password i database
+        const passwordMatch = await bcrypt.compare(password, user.password_hash)
+        //sammenligner indtastet password med hashet password i database
 
-        if(!passwordMatch) {
+        if (!passwordMatch) {
             return res.status(400).json({ message: 'Invalid email or password' }) //sender fejl besked hvis password ikke matcher
         }
 

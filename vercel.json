@@ -1,24 +1,8 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "Be/index.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "Fe/package.json",
-      "use": "@vercel/static-build",
-      "config": { "distDir": "dist" }
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "Be/index.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "Fe/$1"
-    }
+  "buildCommand": "cd Fe && npm install && npm run build",
+  "outputDirectory": "Fe/dist",
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index" }
   ]
 }
