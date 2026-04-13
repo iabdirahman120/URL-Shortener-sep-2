@@ -43,7 +43,8 @@ router.post('/login', async (req, res) => {
 
         res.json({ token }) //sender token tilbage til client
     } catch (error) {
-        res.status(500).json({ message: 'Internal server error' }) //sender fejl besked tilbage til client hvis der er en fejl
+        console.error('Login error:', error)
+        res.status(500).json({ message: 'Internal server error', error: error.message }) //sender fejl besked tilbage til client hvis der er en fejl
     }
 
 })
