@@ -17,6 +17,9 @@ router.post('/shorten', async (req, res) => {
         res.status(201).json(result.rows[0])
     } catch (error) {
         console.error('Error creating short URL:', error)
+        if (error.code === '23505') {
+            return res.status(400).json({ error: 'Det alias er allerede taget — vælg et andet.' })
+        }
         res.status(500).json({ error: 'Internal server error' })
     }
 })

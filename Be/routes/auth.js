@@ -39,7 +39,7 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ message: 'Invalid email or password' }) //sender fejl besked hvis password ikke matcher
         }
 
-        const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' }) //laver jwt token med bruger id og hemmelig nøgle fra env
+        const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' }) //laver jwt token med bruger id og hemmelig nøgle fra env
 
         res.json({ token }) //sender token tilbage til client
     } catch (error) {
