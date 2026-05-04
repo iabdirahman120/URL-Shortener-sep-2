@@ -94,7 +94,7 @@ export default function Dashboard() {
             setUrl("")
             setCustomAlias("")
             setExpiresAt("")
-            setSuccess(`Link oprettet: shr.dk/r/${data.short_code}`)
+            setSuccess(`Link oprettet: ${window.location.origin}/r/${data.short_code}`)
             setTimeout(() => setSuccess(""), 4000)
         } catch (err) {
             console.error('Fejl ved oprettelse:', err)
@@ -233,7 +233,7 @@ export default function Dashboard() {
                                     </thead>
                                     <tbody>
                                         {links.map((link) => {
-                                            const shortUrl = `https://shr.dk/r/${link.short_code}`
+                                            const shortUrl = `${window.location.origin}/r/${link.short_code}`
                                             return (
                                                 <tr key={link.id} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
                                                     <td className="py-3 pr-4 max-w-[220px]">
