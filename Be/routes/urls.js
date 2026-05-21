@@ -3,6 +3,23 @@ const router = express.Router()
 const pool = require('../Db')
 const bcrypt = require('bcrypt')
 
+function parseDevice(userAgent) {
+    if (!userAgent) return 'Ukendt'
+    const ua = userAgent.toLowerCase()
+    if (/mobile|android|iphone|ipad|ipod/.test(ua)) return 'Mobil'
+    if (/tablet/.test(ua)) return 'Tablet'
+    return 'Desktop'
+}
+
+function parseReferrerHost(referrer) {
+    if (!referrer) return 'Direkte'
+    try {
+        return new URL(referrer).hostname.replace('www.', '')
+    } catch {
+        return referrer.substring(0, 50)
+    }
+}
+
 // Opret kort link
 router.post('/shorten', async (req, res) => {
     const { originalUrl, custom_alias, expires_at, password } = req.body
@@ -21,7 +38,6 @@ router.post('/shorten', async (req, res) => {
         )
 
         const row = result.rows[0]
-        // Returner ikke password_hash til klienten
         delete row.password_hash
         res.status(201).json(row)
     } catch (error) {
@@ -89,7 +105,7 @@ router.patch('/:id', async (req, res) => {
     }
 })
 
-// Klik-statistik per dag (seneste 30 dage)
+// Klik-statistik per dag + enhed + referrer (seneste 30 dage)
 router.get('/:id/stats', async (req, res) => {
     const { id } = req.params
     const user_id = req.userId
@@ -100,37 +116,66 @@ router.get('/:id/stats', async (req, res) => {
             return res.status(404).json({ error: 'Link ikke fundet' })
         }
 
-        const result = await pool.query(
-            `SELECT DATE(clicked_at) as date, COUNT(*) as clicks
-             FROM click_events
-             WHERE url_id = $1
-               AND clicked_at >= NOW() - INTERVAL '30 days'
-             GROUP BY DATE(clicked_at)
-             ORDER BY DATE(clicked_at)`,
-            [id]
-        )
+        const [dailyResult, deviceResult, referrerResult] = await Promise.all([
+            pool.query(
+                `SELECT DATE(clicked_at) as date, COUNT(*) as clicks
+                 FROM click_events
+                 WHERE url_id = $1 AND clicked_at >= NOW() - INTERVAL '30 days'
+                 GROUP BY DATE(clicked_at)
+                 ORDER BY DATE(clicked_at)`,
+                [id]
+            ),
+            pool.query(
+                `SELECT user_agent, COUNT(*) as count
+                 FROM click_events
+                 WHERE url_id = $1 AND clicked_at >= NOW() - INTERVAL '30 days'
+                 GROUP BY user_agent`,
+                [id]
+            ),
+            pool.query(
+                `SELECT referrer, COUNT(*) as count
+                 FROM click_events
+                 WHERE url_id = $1 AND clicked_at >= NOW() - INTERVAL '30 days'
+                 GROUP BY referrer
+                 ORDER BY count DESC
+                 LIMIT 5`,
+                [id]
+            )
+        ])
 
-        // Fyld huller (dage uden klik) med 0
+        // Fyld huller med 0
         const today = new Date()
         const days = []
         for (let i = 29; i >= 0; i--) {
             const d = new Date(today)
             d.setDate(d.getDate() - i)
-            const dateStr = d.toISOString().split('T')[0]
-            days.push(dateStr)
+            days.push(d.toISOString().split('T')[0])
         }
 
         const clickMap = {}
-        result.rows.forEach(r => {
+        dailyResult.rows.forEach(r => {
             clickMap[r.date.toISOString().split('T')[0]] = parseInt(r.clicks)
         })
 
-        const stats = days.map(date => ({
-            date,
-            clicks: clickMap[date] || 0
+        const daily = days.map(date => ({ date, clicks: clickMap[date] || 0 }))
+
+        // Gruppér enheder
+        const deviceMap = { Desktop: 0, Mobil: 0, Tablet: 0, Ukendt: 0 }
+        deviceResult.rows.forEach(r => {
+            const device = parseDevice(r.user_agent)
+            deviceMap[device] = (deviceMap[device] || 0) + parseInt(r.count)
+        })
+        const devices = Object.entries(deviceMap)
+            .filter(([, v]) => v > 0)
+            .map(([name, count]) => ({ name, count }))
+
+        // Top referrers
+        const referrers = referrerResult.rows.map(r => ({
+            source: parseReferrerHost(r.referrer),
+            count: parseInt(r.count)
         }))
 
-        res.json(stats)
+        res.json({ daily, devices, referrers })
     } catch (error) {
         console.error('Error fetching stats:', error)
         res.status(500).json({ error: 'Internal server error' })

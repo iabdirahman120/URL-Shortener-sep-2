@@ -12,7 +12,6 @@ const subscriptionRoutes = require('./routes/subscription')
 const adminRoutes = require('./routes/admin')
 
 const app = express()
-// Webhook skal have raw body — registreres FØR express.json()
 app.use('/api/subscription/webhook', express.raw({ type: 'application/json' }))
 app.use(express.json())
 app.use(cors())
@@ -20,7 +19,6 @@ app.use('/api/urls', verifyToken, urlRoutes)
 app.use('/api/auth', authRoutes)
 app.use('/api/apikeys', verifyToken, apiKeyRoutes)
 app.use('/api/subscription', (req, res, next) => {
-    // Webhook bruger ikke token
     if (req.path === '/webhook') return next()
     return verifyToken(req, res, next)
 }, subscriptionRoutes)
@@ -39,26 +37,32 @@ app.get('/r/:short_code', async (req, res) => {
         const result = await pool.query('SELECT * FROM urls WHERE short_code = $1', [short_code])
 
         if (result.rows.length === 0) {
-            return res.status(404).json({ message: 'Link ikke fundet' })
+            return res.redirect(302, '/not-found')
         }
 
         const url = result.rows[0]
 
         if (url.expires_at && new Date(url.expires_at) < new Date()) {
-            return res.status(410).json({ message: 'Link er udløbet' })
+            return res.redirect(302, '/not-found?reason=expired')
         }
 
         if (url.password_hash) {
             return res.redirect(302, `/password/${short_code}`)
         }
 
+        const referrer = req.get('referer') || req.get('referrer') || null
+        const userAgent = req.get('user-agent') || null
+
         await pool.query('UPDATE urls SET clicks = clicks + 1 WHERE id = $1', [url.id])
-        await pool.query('INSERT INTO click_events (url_id) VALUES ($1)', [url.id])
+        await pool.query(
+            'INSERT INTO click_events (url_id, referrer, user_agent) VALUES ($1, $2, $3)',
+            [url.id, referrer, userAgent]
+        )
 
         res.redirect(url.original_url)
     } catch (error) {
         console.error('Redirect error:', error)
-        res.status(500).json({ message: 'Internal server error' })
+        res.redirect(302, '/not-found')
     }
 })
 
@@ -85,8 +89,14 @@ app.post('/api/r/:short_code/verify', async (req, res) => {
             return res.status(401).json({ error: 'Forkert adgangskode' })
         }
 
+        const referrer = req.get('referer') || null
+        const userAgent = req.get('user-agent') || null
+
         await pool.query('UPDATE urls SET clicks = clicks + 1 WHERE id = $1', [url.id])
-        await pool.query('INSERT INTO click_events (url_id) VALUES ($1)', [url.id])
+        await pool.query(
+            'INSERT INTO click_events (url_id, referrer, user_agent) VALUES ($1, $2, $3)',
+            [url.id, referrer, userAgent]
+        )
 
         res.json({ redirect_url: url.original_url })
     } catch (error) {
@@ -94,7 +104,6 @@ app.post('/api/r/:short_code/verify', async (req, res) => {
         res.status(500).json({ error: 'Internal server error' })
     }
 })
-
 
 module.exports = app
 

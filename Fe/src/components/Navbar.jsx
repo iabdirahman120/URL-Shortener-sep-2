@@ -1,12 +1,24 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import { Link2, ShieldCheck } from 'lucide-react'
+import { Link2, ShieldCheck, Moon, Sun } from 'lucide-react'
+import { useState, useEffect } from 'react'
 
 export function Navbar() {
     const navigate = useNavigate()
     const location = useLocation()
     const token = localStorage.getItem('token')
     const isAdmin = localStorage.getItem('is_admin') === 'true'
+    const [dark, setDark] = useState(() => document.documentElement.classList.contains('dark'))
+
+    useEffect(() => {
+        if (dark) {
+            document.documentElement.classList.add('dark')
+            localStorage.setItem('theme', 'dark')
+        } else {
+            document.documentElement.classList.remove('dark')
+            localStorage.setItem('theme', 'light')
+        }
+    }, [dark])
 
     const handleLogout = () => {
         localStorage.removeItem('token')
@@ -33,6 +45,14 @@ export function Navbar() {
                 </div>
 
                 <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => setDark(d => !d)}
+                        className="w-8 h-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                        title={dark ? 'Lys tilstand' : 'Mørk tilstand'}
+                    >
+                        {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                    </button>
+
                     {token ? (
                         <>
                             {isAdmin && (

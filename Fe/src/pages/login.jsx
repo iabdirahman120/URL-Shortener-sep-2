@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Navbar } from "@/components/Navbar"
+import { Footer } from "@/components/Footer"
 import { useState } from "react"
 import { useNavigate, Link } from "react-router-dom"
 
@@ -29,9 +30,10 @@ export default function Login() {
 
         if (data.token) {
             localStorage.setItem('token', data.token)
+            localStorage.setItem('is_admin', data.is_admin ? 'true' : 'false')
             navigate('/dashboard')
         } else {
-            setError('Forkert email eller adgangskode.')
+            setError(data.message || 'Forkert email eller adgangskode.')
         }
     }
 
@@ -58,7 +60,12 @@ export default function Login() {
                                 />
                             </div>
                             <div className="space-y-1.5">
-                                <Label htmlFor="password">Adgangskode</Label>
+                                <div className="flex items-center justify-between">
+                                    <Label htmlFor="password">Adgangskode</Label>
+                                    <Link to="/forgot-password" className="text-xs text-primary hover:underline">
+                                        Glemt adgangskode?
+                                    </Link>
+                                </div>
                                 <Input
                                     type="password"
                                     id="password"
@@ -82,6 +89,7 @@ export default function Login() {
                     </CardContent>
                 </Card>
             </div>
+            <Footer />
         </div>
     )
 }
