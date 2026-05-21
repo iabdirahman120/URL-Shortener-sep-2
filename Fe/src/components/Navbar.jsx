@@ -1,14 +1,16 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import { Link2 } from 'lucide-react'
+import { Link2, ShieldCheck } from 'lucide-react'
 
 export function Navbar() {
     const navigate = useNavigate()
     const location = useLocation()
     const token = localStorage.getItem('token')
+    const isAdmin = localStorage.getItem('is_admin') === 'true'
 
     const handleLogout = () => {
         localStorage.removeItem('token')
+        localStorage.removeItem('is_admin')
         navigate('/')
     }
 
@@ -23,14 +25,24 @@ export function Navbar() {
                 </Link>
 
                 <div className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
-                    <a href="#funktioner" className="hover:text-foreground transition-colors">Funktioner</a>
-                    <a href="#priser" className="hover:text-foreground transition-colors">Priser</a>
-                    <a href="#api" className="hover:text-foreground transition-colors">API</a>
+                    <a href="/#funktioner" className="hover:text-foreground transition-colors">Funktioner</a>
+                    <a href="/#priser" className="hover:text-foreground transition-colors">Priser</a>
+                    <Link to="/docs" className={`hover:text-foreground transition-colors ${isActive('/docs') ? 'text-foreground font-medium' : ''}`}>
+                        API
+                    </Link>
                 </div>
 
                 <div className="flex items-center gap-2">
                     {token ? (
                         <>
+                            {isAdmin && (
+                                <Link to="/admin">
+                                    <Button variant={isActive('/admin') ? 'default' : 'ghost'} size="sm" className="gap-1.5">
+                                        <ShieldCheck className="w-3.5 h-3.5" />
+                                        Admin
+                                    </Button>
+                                </Link>
+                            )}
                             <Link to="/dashboard">
                                 <Button variant={isActive('/dashboard') ? 'default' : 'ghost'} size="sm">
                                     Dashboard
