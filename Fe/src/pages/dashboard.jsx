@@ -51,7 +51,7 @@ function StatsModal({ link, onClose }) {
             .catch(() => setLoading(false))
     }, [link.id])
 
-    const totalInPeriod = data ? data.daily.reduce((s, d) => s + d.clicks, 0) : 0
+    const totalInPeriod = data?.daily ? data.daily.reduce((s, d) => s + d.clicks, 0) : 0
     const formatDate = (s) => { const d = new Date(s); return `${d.getDate()}/${d.getMonth() + 1}` }
 
     return (
@@ -61,7 +61,7 @@ function StatsModal({ link, onClose }) {
                     <p className="font-semibold text-foreground">Klik-statistik</p>
                     <button onClick={onClose} className="text-muted-foreground hover:text-foreground"><X className="w-4 h-4" /></button>
                 </div>
-                <p className="text-xs text-muted-foreground mb-4">shr.dk/r/{link.short_code} — {totalInPeriod} klik seneste 30 dage</p>
+                <p className="text-xs text-muted-foreground mb-4">shr.dk/{link.short_code} — {totalInPeriod} klik seneste 30 dage</p>
 
                 {loading ? (
                     <div className="h-48 flex items-center justify-center text-muted-foreground text-sm">Indlæser...</div>
@@ -228,7 +228,7 @@ export default function Dashboard() {
             setLinks([data, ...links])
             setUrl(""); setCustomAlias(""); setExpiresAt(""); setPassword("")
             setShowOnboarding(false)
-            setSuccess(`Link oprettet: shr.dk/r/${data.short_code}`)
+            setSuccess(`Link oprettet: shr.dk/${data.short_code}`)
             setTimeout(() => setSuccess(""), 4000)
         } catch { alert('Kunne ikke oprette link.') }
     }
@@ -447,7 +447,7 @@ export default function Dashboard() {
                                                 if (editingId === link.id) {
                                                     return <EditRow key={link.id} link={link} onSave={handleEditSave} onCancel={() => setEditingId(null)} />
                                                 }
-                                                const shortUrl = `https://shr.dk/r/${link.short_code}`
+                                                const shortUrl = `https://shr.dk/${link.short_code}`
                                                 const isExpired = link.expires_at && new Date(link.expires_at) < now
                                                 return (
                                                     <tr key={link.id} className={`border-b last:border-0 transition-colors ${isExpired ? 'opacity-60' : 'hover:bg-muted/30'}`}>
@@ -462,7 +462,7 @@ export default function Dashboard() {
                                                         <td className="py-3 pr-4">
                                                             <div className="flex items-center gap-2 flex-wrap">
                                                                 <a href={shortUrl} target="_blank" rel="noreferrer" className="text-primary hover:underline font-medium flex items-center gap-1 text-xs">
-                                                                    shr.dk/r/{link.short_code}
+                                                                    shr.dk/{link.short_code}
                                                                     <ExternalLink className="w-3 h-3 opacity-60" />
                                                                 </a>
                                                                 <CopyButton text={shortUrl} />

@@ -53,16 +53,41 @@ app.get('/r/:short_code', async (req, res) => {
         const referrer = req.get('referer') || req.get('referrer') || null
         const userAgent = req.get('user-agent') || null
 
-        await pool.query('UPDATE urls SET clicks = clicks + 1 WHERE id = $1', [url.id])
-        await pool.query(
+        res.redirect(url.original_url)
+
+        pool.query('UPDATE urls SET clicks = clicks + 1 WHERE id = $1', [url.id]).catch(console.error)
+        pool.query(
             'INSERT INTO click_events (url_id, referrer, user_agent) VALUES ($1, $2, $3)',
             [url.id, referrer, userAgent]
-        )
-
-        res.redirect(url.original_url)
+        ).catch(console.error)
     } catch (error) {
         console.error('Redirect error:', error)
         res.redirect(302, '/not-found')
+    }
+})
+
+app.get('/:short_code', async (req, res) => {
+    const { short_code } = req.params
+    try {
+        const result = await pool.query('SELECT * FROM urls WHERE short_code = $1', [short_code])
+        if (result.rows.length === 0) {
+            return res.redirect(302, '/not-found')
+        }
+        const url = result.rows[0]
+        if (url.expires_at && new Date(url.expires_at) < new Date()) {
+            return res.redirect(302, '/not-found?reason=expired')
+        }
+        if (url.password_hash) {
+            return res.redirect(302, `/password/${short_code}`)
+        }
+        const referrer = req.get('referer') || req.get('referrer') || null
+        const userAgent = req.get('user-agent') || null
+        res.redirect(url.original_url)
+        pool.query('UPDATE urls SET clicks = clicks + 1 WHERE id = $1', [url.id]).catch(console.error)
+        pool.query('INSERT INTO click_events (url_id, referrer, user_agent) VALUES ($1, $2, $3)', [url.id, referrer, userAgent]).catch(console.error)
+    } catch (error) {
+        console.error('Short redirect error:', error)
+        res.status(500).send('Server error')
     }
 })
 

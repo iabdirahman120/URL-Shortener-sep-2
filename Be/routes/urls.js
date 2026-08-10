@@ -26,6 +26,15 @@ router.post('/shorten', async (req, res) => {
     const user_id = req.userId
 
     try {
+        let normalizedUrl = (originalUrl || '').trim()
+        if (!normalizedUrl) return res.status(400).json({ error: 'URL mangler.' })
+        if (!/^https?:\/\//i.test(normalizedUrl)) {
+            normalizedUrl = 'https://' + normalizedUrl
+        }
+        try { new URL(normalizedUrl) } catch {
+            return res.status(400).json({ error: 'Ugyldig URL.' })
+        }
+
         const short_code = custom_alias || Math.random().toString(36).substring(2, 8)
         let password_hash = null
         if (password) {
@@ -34,7 +43,7 @@ router.post('/shorten', async (req, res) => {
 
         const result = await pool.query(
             'INSERT INTO urls (original_url, short_code, user_id, expires_at, custom_alias, password_hash) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-            [originalUrl, short_code, user_id, expires_at || null, custom_alias || null, password_hash]
+            [normalizedUrl, short_code, user_id, expires_at || null, custom_alias || null, password_hash]
         )
 
         const row = result.rows[0]

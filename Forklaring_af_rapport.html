@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<title>Forklaring af SEP2 rapport</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, 'Segoe UI', Arial, sans-serif; font-size: 11pt; line-height: 1.75; color: #1e1e2e; background: #f9f7ff; }
+
+.sidebar {
+  position: fixed; top: 0; left: 0; width: 230px; height: 100vh;
+  background: #1e1e2e; overflow-y: auto; padding: 20px 0;
+}
+.sidebar-title { color: #a78bfa; font-size: 10pt; font-weight: 700; padding: 0 20px 12px; border-bottom: 1px solid #374151; margin-bottom: 10px; letter-spacing: 1px; text-transform: uppercase; }
+.sidebar a { display: block; padding: 7px 20px; color: #9ca3af; text-decoration: none; font-size: 9.5pt; border-left: 3px solid transparent; }
+.sidebar a:hover { color: #e9d5ff; background: #374151; }
+.sidebar a.active { color: #e9d5ff; border-left-color: #7c3aed; background: #2d2b3e; }
+.sidebar .sep { height: 1px; background: #374151; margin: 8px 20px; }
+
+.main { margin-left: 230px; padding: 40px 50px; max-width: 860px; }
+
+h1.page-title { font-size: 22pt; font-weight: 800; color: #6d28d9; margin-bottom: 6px; }
+.page-sub { font-size: 11pt; color: #6b7280; margin-bottom: 40px; }
+
+.section { margin-bottom: 60px; scroll-margin-top: 30px; }
+.section-num { font-size: 9pt; font-weight: 700; color: #7c3aed; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+h2.sec-title { font-size: 17pt; font-weight: 700; color: #1e1e2e; border-bottom: 2px solid #e9d5ff; padding-bottom: 10px; margin-bottom: 20px; }
+h3.sub { font-size: 12pt; font-weight: 700; color: #6d28d9; margin: 24px 0 8px; }
+p { margin-bottom: 12px; }
+
+.explain-box {
+  background: white; border: 1.5px solid #e9d5ff; border-radius: 8px;
+  padding: 18px 20px; margin: 14px 0;
+}
+.explain-box h4 { font-size: 10pt; font-weight: 700; color: #7c3aed; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+.exam-box {
+  background: #faf5ff; border-left: 4px solid #7c3aed;
+  padding: 14px 16px; margin: 14px 0; border-radius: 0 8px 8px 0;
+}
+.exam-box h4 { font-size: 10pt; font-weight: 700; color: #6d28d9; margin-bottom: 6px; }
+
+.code-box {
+  background: #1e1e2e; color: #cdd6f4; padding: 14px 16px;
+  border-radius: 8px; font-family: 'Courier New', monospace;
+  font-size: 9pt; line-height: 1.6; margin: 12px 0;
+  overflow-x: auto;
+}
+.code-box .comment { color: #6272a4; }
+.code-box .keyword { color: #ff79c6; }
+.code-box .string { color: #f1fa8c; }
+.code-box .fn { color: #50fa7b; }
+
+.why-box {
+  background: #f0fdf4; border: 1.5px solid #86efac;
+  border-radius: 8px; padding: 14px 16px; margin: 14px 0;
+}
+.why-box h4 { color: #15803d; font-size: 10pt; margin-bottom: 6px; }
+
+.warning-box {
+  background: #fff7ed; border: 1.5px solid #fed7aa;
+  border-radius: 8px; padding: 14px 16px; margin: 14px 0;
+}
+.warning-box h4 { color: #c2410c; font-size: 10pt; margin-bottom: 6px; }
+
+table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 10pt; }
+th { background: #6d28d9; color: white; padding: 8px 12px; text-align: left; font-weight: 600; }
+td { padding: 8px 12px; border-bottom: 1px solid #e9d5ff; vertical-align: top; }
+tr:nth-child(even) td { background: #faf5ff; }
+
+ul, ol { padding-left: 22px; margin-bottom: 12px; }
+li { margin-bottom: 5px; }
+strong { color: #1e1e2e; }
+code { background: #ede9fe; color: #6d28d9; padding: 2px 6px; border-radius: 4px; font-size: 9.5pt; font-family: 'Courier New', monospace; }
+
+.term { font-weight: 700; color: #6d28d9; }
+
+@media print { .sidebar { display: none; } .main { margin-left: 0; } }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-title">Indhold</div>
+  <a href="#intro">1. Introduktion</a>
+  <a href="#problem">2. Problemformulering</a>
+  <a href="#krav">3. Krav</a>
+  <div class="sep"></div>
+  <a href="#scrum">4. Scrum</a>
+  <a href="#backlog">— Product Backlog</a>
+  <a href="#sprints">— Sprints</a>
+  <a href="#burndown">— Burndown</a>
+  <div class="sep"></div>
+  <a href="#usecase">5. Use Case Model</a>
+  <a href="#domain">6. Domænemodel</a>
+  <a href="#aktivitet">7. Aktivitetsdiagrammer</a>
+  <a href="#ssd">8. Systemsekvensdiagrammer</a>
+  <a href="#arkitektur">9. Systemarkitektur</a>
+  <div class="sep"></div>
+  <a href="#design">10. Design</a>
+  <a href="#database">11. Database Design</a>
+  <a href="#impl">12. Implementation</a>
+  <a href="#test">13. Test</a>
+  <a href="#refleksion">14. Refleksion</a>
+</nav>
+
+<div class="main">
+
+<h1 class="page-title">Forklaring af SEP2 rapport</h1>
+<p class="page-sub">URL Shortener — shr.dk &nbsp;·&nbsp; Gennemgang af alle afsnit i rapporten</p>
+
+<!-- ─────────────────────────────────── 1 -->
+<div class="section" id="intro">
+  <div class="section-num">Afsnit 1</div>
+  <h2 class="sec-title">Introduktion</h2>
+
+  <p>Introduktionen er den første tekst eksaminatoren læser. Den skal på kort tid svare på: <em>hvad er projektet, hvem har lavet det, og hvad er formålet?</em></p>
+
+  <div class="explain-box">
+    <h4>Hvad beskriver introduktionen?</h4>
+    <ul>
+      <li><strong>Systemets navn:</strong> shr.dk — en URL Shortener</li>
+      <li><strong>Hvad systemet gør:</strong> Konverterer lange URL-adresser til korte, delbare links</li>
+      <li><strong>Konteksten:</strong> Udviklet som SEP2-projekt i samarbejde med virksomheden ZNG</li>
+      <li><strong>Teknologistakken:</strong> Node.js backend, React frontend, PostgreSQL database</li>
+      <li><strong>Kommunikation:</strong> HTTP REST API med JWT-autentificering</li>
+    </ul>
+  </div>
+
+  <div class="exam-box">
+    <h4>Sådan kan du forklare det til eksamen:</h4>
+    <p>"Projektet hedder shr.dk og er et URL-forkortelses-system. Systemet er bygget som et client/server system, hvor en React-frontend kommunikerer med en Node.js/Express-backend via HTTP. Alt data — brugere, links, klik — gemmes i en PostgreSQL-database. Brugere autentificeres med JWT-tokens."</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────── 2 -->
+<div class="section" id="problem">
+  <div class="section-num">Afsnit 2</div>
+  <h2 class="sec-title">Problemformulering</h2>
+
+  <p>Problemformuleringen er udgangspunktet for hele projektet. Den skal definere <em>det problem du løser</em> — og stille det som et præcist spørgsmål.</p>
+
+  <div class="explain-box">
+    <h4>Problemet</h4>
+    <p>Lange URL-adresser er svære at dele — de fylder for meget i SMS, sociale medier og trykt materiale. Et URL-forkortelses-system løser det ved at erstatte lange adresser med korte links, der automatisk viderestiller besøgende.</p>
+  </div>
+
+  <div class="explain-box">
+    <h4>Den centrale problemstilling i rapporten</h4>
+    <p><em>"Hvordan kan man designe og implementere et sikkert client/server system, der effektivt genererer, gemmer og håndterer forkortede URL-links — med brugerkonti, statistik, adgangskodebeskyttelse og administrationspanel?"</em></p>
+  </div>
+
+  <div class="exam-box">
+    <h4>Til eksamen — forbind problemet med løsningen:</h4>
+    <p>"Problemet er, at lange URLs er svære at dele. Løsningen er et system, der genererer korte koder og gemmer en mapping fra kode til original URL i databasen. Når nogen besøger det korte link, slår serveren koden op og redirecter automatisk."</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────── 3 -->
+<div class="section" id="krav">
+  <div class="section-num">Afsnit 3</div>
+  <h2 class="sec-title">Krav</h2>
+
+  <p>Kravene er fundamentet som resten af projektet bygger på. Eksaminatoren vil tjekke om dine krav hænger sammen med din implementation og dine tests.</p>
+
+  <h3 class="sub">Funktionelle krav (FK)</h3>
+  <div class="explain-box">
+    <h4>Hvad er et funktionelt krav?</h4>
+    <p>Et funktionelt krav beskriver <strong>hvad systemet skal kunne gøre</strong> — altså en konkret funktion eller adfærd set fra brugerens synspunkt.</p>
+    <p><strong>Eksempler fra rapporten:</strong></p>
+    <ul>
+      <li>FK-03: Bruger kan forkorte en lang URL og modtage et kort link</li>
+      <li>FK-04: Systemet viderestiller besøgende fra kort link til original URL</li>
+      <li>FK-07: Bruger kan se klikstatistik (daglige klik, enhed, referrer)</li>
+    </ul>
+  </div>
+
+  <h3 class="sub">Ikke-funktionelle krav (IFK)</h3>
+  <div class="explain-box">
+    <h4>Hvad er et ikke-funktionelt krav?</h4>
+    <p>Et ikke-funktionelt krav beskriver <strong>hvordan systemet skal opføre sig</strong> — kvaliteter som sikkerhed, ydeevne og pålidelighed. Det er ikke en funktion, men en egenskab.</p>
+    <p><strong>Eksempler fra rapporten:</strong></p>
+    <ul>
+      <li>IFK-01: Adgangskoder hashes med bcrypt — gemmes aldrig i klar tekst (sikkerhed)</li>
+      <li>IFK-03: SQL-forespørgsler bruger parameteriserede queries (sikkerhed mod SQL injection)</li>
+      <li>IFK-04: Redirect sker inden for 500 ms (ydeevne)</li>
+    </ul>
+  </div>
+
+  <div class="exam-box">
+    <h4>Til eksamen — forskel på FK og IFK:</h4>
+    <p>"Funktionelle krav siger <em>hvad</em> systemet gør — fx at man kan forkorte en URL. Ikke-funktionelle krav siger <em>hvordan</em> — fx at adgangskoder altid hashes med bcrypt og aldrig gemmes i klar tekst."</p>
+  </div>
+
+  <div class="why-box">
+    <h4>Hvorfor er krav vigtige i SEP2?</h4>
+    <p>SEP2 kræver en tydelig sammenhæng: krav → use cases → design → implementation → test. Hvert krav skal kunne spores hele vejen igennem. FK-03 (forkorte URL) fører til UC3 (Use Case), som fører til POST /api/urls/shorten (implementation), som fører til TC-05 (test).</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────── 4 -->
+<div class="section" id="scrum">
+  <div class="section-num">Afsnit 4</div>
+  <h2 class="sec-title">Scrum-proces</h2>
+
+  <p>Scrum er en agil udviklingsmetode. I dette projekt er det tilpasset til soloarbejde, men strukturen er fulgt: product backlog, sprints, reviews og retrospectives.</p>
+
+  <div class="explain-box">
+    <h4>De tre Scrum-roller (i dette projekt varetaget af én person)</h4>
+    <ul>
+      <li><span class="term">Product Owner:</span> Prioriterer hvad der skal laves. Beslutter hvilke user stories der er vigtigst.</li>
+      <li><span class="term">Scrum Master:</span> Sikrer at processen følges. Fjerner forhindringer.</li>
+      <li><span class="term">Developer:</span> Implementerer løsningen.</li>
+    </ul>
+  </div>
+
+  <div class="explain-box">
+    <h4>De tre faser i projektet</h4>
+    <ul>
+      <li><strong>Sprint 0 (uge 1–2):</strong> Analyse og planlægning — videnssøgning, krav, use cases, diagrammer. Ingen kode.</li>
+      <li><strong>Sprint 1 (uge 3–4):</strong> Backend og database — register, login, URL-forkortelse, redirect, dashboard API.</li>
+      <li><strong>Sprint 2 (uge 4–5):</strong> Frontend og avancerede funktioner — React UI, statistik, admin panel, password-links, email-reset.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="section" id="backlog">
+  <h3 class="sub">Product Backlog og User Stories</h3>
+
+  <div class="explain-box">
+    <h4>Hvad er en User Story?</h4>
+    <p>En user story beskriver en funktion set fra brugerens perspektiv i formatet:</p>
+    <p><em>"Som [rolle] vil jeg [handling], så jeg [formål]"</em></p>
+    <p><strong>Eksempel:</strong> "Som bruger vil jeg forkorte en URL, så jeg kan dele korte links"</p>
+  </div>
+
+  <div class="explain-box">
+    <h4>Hvad er Story Points overhovedet?</h4>
+    <p>Story points (SP) er en måde at sætte et tal på, <strong>hvor svær og tidskrævende</strong> en user story er — men ikke i timer. Det er et relativt tal: vi sammenligner user stories med hinanden og siger "den her er dobbelt så svær som den der".</p>
+    <p>Forskellen fra timer er vigtig: timer afhænger af, hvem der laver opgaven og hvor hurtig de er den dag. Story points handler om kompleksitet i sig selv — uanset hvem der koder det.</p>
+  </div>
+
+  <div class="explain-box">
+    <h4>Skalaen — Fibonacci-tal</h4>
+    <p>Story points bruges typisk med Fibonacci-tal: 1, 2, 3, 5, 8, 13... Grunden er, at jo større en opgave er, jo sværere er det at estimere præcist. Fibonacci-tal tvinger os til at vælge klart — i stedet for at sige "3 eller 4" skal vi vælge enten 3 eller 5.</p>
+    <p>I dette projekt brugte vi kun 1, 2, 3 og 5 fordi ingen opgave var enormt stor.</p>
+
+    <table>
+      <tr><th>SP</th><th>Hvad det betyder</th><th>Eksempel fra projektet</th></tr>
+      <tr><td><strong>1</strong></td><td>Triviel. Én simpel operation, ingen logik at tænke over.</td><td>US-06: Slet link — ét SQL-kald: DELETE FROM urls WHERE id = $1</td></tr>
+      <tr><td><strong>2</strong></td><td>Lille. Et par trin, men ingen kompleksitet.</td><td>US-02: Login — query + tjek password + lav JWT token</td></tr>
+      <tr><td><strong>3</strong></td><td>Medium. Flere dele der hænger sammen, lidt at tænke over.</td><td>US-01: Register — validering + bcrypt hashing + database insert + fejlhåndtering</td></tr>
+      <tr><td><strong>5</strong></td><td>Stor. Kompleks logik, mange komponenter, svær at overskue.</td><td>US-07: Statistik — 3 parallelle SQL-queries, dato-gap-udfyldning, device-parsing, referrer-parsing, chart i frontend</td></tr>
+    </table>
+  </div>
+
+  <div class="explain-box">
+    <h4>Hvordan finder man et story point-tal? (Processen)</h4>
+    <p>Man starter med at finde <strong>referenceopgaven</strong> — den simpleste opgave man kan forestille sig. Her er det US-06 (slet link), som får 1 SP. Herefter estimerer man alle andre opgaver <em>i forhold til</em> den:</p>
+    <ul>
+      <li>"Slet link er 1. Login er lidt sværere — der er et par trin mere. Jeg siger 2."</li>
+      <li>"Register er sværere end login fordi der er bcrypt-hashing og unique constraint at håndtere. Jeg siger 3."</li>
+      <li>"Statistik er meget sværere end register. Der er 3 database-queries, dato-logik og chart. Jeg siger 5."</li>
+    </ul>
+    <p>Man placerer ikke et tal først og begrunder det bagefter — man sammenligner og lander på et tal.</p>
+  </div>
+
+  <div class="explain-box">
+    <h4>Alle user stories og begrundelse for SP</h4>
+    <table>
+      <tr><th>ID</th><th>User Story</th><th>SP</th><th>Hvorfor netop det tal</th></tr>
+      <tr><td>US-01</td><td>Opret konto</td><td>3</td><td>Validering + bcrypt hash (asynkron) + INSERT + unique-fejl håndtering</td></tr>
+      <tr><td>US-02</td><td>Log ind</td><td>2</td><td>SELECT + bcrypt.compare + jwt.sign — færre trin end register</td></tr>
+      <tr><td>US-03</td><td>Forkorte URL</td><td>3</td><td>Random kode generering + INSERT + collision-håndtering (unique constraint)</td></tr>
+      <tr><td>US-04</td><td>Redirect via kort link</td><td>2</td><td>SELECT + tjek udløb + redirect — simpelt flow, men to ekstra checks</td></tr>
+      <tr><td>US-05</td><td>Se mine links</td><td>3</td><td>SELECT med WHERE + render tabel med alle felter i frontend</td></tr>
+      <tr><td>US-06</td><td>Slet link</td><td>1</td><td>Ét SQL-kald, ingen logik — referenceopgaven</td></tr>
+      <tr><td>US-07</td><td>Statistik (klik/enhed/referrer)</td><td>5</td><td>3 parallelle queries, 30-dags dato-loop, device-parsing fra user-agent, referrer-parsing, chart-komponent</td></tr>
+      <tr><td>US-08</td><td>Redigér link</td><td>2</td><td>UPDATE med COALESCE — ligner slet-link men lidt mere</td></tr>
+      <tr><td>US-09</td><td>Udløbsdato</td><td>2</td><td>Ekstra felt i INSERT + tjek i redirect-logik</td></tr>
+      <tr><td>US-10</td><td>Adgangskodebeskyttelse</td><td>3</td><td>bcrypt hash ved opret + verify-endpoint + redirect-flow ændring</td></tr>
+      <tr><td>US-11</td><td>Nulstil adgangskode via email</td><td>3</td><td>crypto token + database lagring + nodemailer email + reset-endpoint</td></tr>
+      <tr><td>US-12</td><td>Admin: se alle brugere/links</td><td>3</td><td>JOIN-query + admin-middleware + frontend admin-panel</td></tr>
+      <tr><td>US-13</td><td>Admin: slet bruger/link</td><td>2</td><td>DELETE med cascade — ligner US-06 men to endpoints</td></tr>
+    </table>
+    <p><strong>Total: 34 story points</strong> fordelt på Sprint 1 (14 SP) og Sprint 2 (20 SP).</p>
+  </div>
+
+  <div class="why-box">
+    <h4>Hvorfor bruger man story points og ikke bare timer?</h4>
+    <p>Fordi tidsestimater er notorisk unøjagtige i softwareudvikling. En erfaren udvikler bruger måske 30 minutter på login, en studerende bruger 3 timer. Story points handler om kompleksitet, ikke om hvem der koder det.</p>
+    <p>Derudover er det nemmere at sammenligne relativt: "den her er dobbelt så svær som den der" er meget lettere at vurdere end "den her tager præcis 4 timer og 23 minutter".</p>
+  </div>
+
+  <div class="exam-box">
+    <h4>Til eksamen — sådan forklarer du det:</h4>
+    <p>"Story points er en relativ vurdering af kompleksitet, ikke timer. Jeg startede med at finde den simpleste opgave — slet link, som fik 1 SP. Derefter estimerede jeg alle andre stories i forhold til den. Jo flere dele der hænger sammen, jo flere points. US-07 statistik fik 5 SP fordi den krævede 3 parallelle database-queries, dato-logik for at udfylde huller i 30 dage, parsing af user-agent for enhedstype, og en chart-komponent i frontend — langt den mest komplekse feature."</p>
+  </div>
+</div>
+
+<div class="section" id="sprints">
+  <h3 class="sub">Sprint Planning, Review og Retrospective</h3>
+
+  <div class="explain-box">
+    <h4>Hvad sker der i et sprint?</h4>
+    <table>
+      <tr><th>Hændelse</th><th>Hvornår</th><th>Hvad sker der</th></tr>
+      <tr><td>Sprint Planning</td><td>Start af sprint</td><td>Vælg user stories fra backlog. Beskriv konkrete opgaver.</td></tr>
+      <tr><td>Daily Scrum</td><td>Dagligt (solo: daglig refleksion)</td><td>Hvad lavede jeg i går? Hvad laver jeg i dag? Er der forhindringer?</td></tr>
+      <tr><td>Sprint Review</td><td>Slut af sprint</td><td>Vis hvad der er bygget. Er alle user stories færdige?</td></tr>
+      <tr><td>Sprint Retrospective</td><td>Slut af sprint</td><td>Hvad gik godt? Hvad kan forbedres til næste sprint?</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="section" id="burndown">
+  <h3 class="sub">Burndown Chart</h3>
+
+  <div class="explain-box">
+    <h4>Hvad viser et burndown chart?</h4>
+    <p>Et burndown chart viser, hvor mange story points der er tilbage over tid i et sprint.</p>
+    <ul>
+      <li><strong>Y-aksen:</strong> Resterende story points</li>
+      <li><strong>X-aksen:</strong> Dage i sprintet</li>
+      <li><strong>Den stiplede linje:</strong> Ideallinjen — hvis man arbejder jævnt hele sprintet</li>
+      <li><strong>Den fuldt optrukne linje:</strong> Faktisk fremskridt</li>
+    </ul>
+    <p>Starter øverst til venstre og slutter i 0 nederst til højre, når alle opgaver er færdige.</p>
+  </div>
+
+  <div class="exam-box">
+    <h4>Til eksamen:</h4>
+    <p>"Burndown chartet for Sprint 1 starter på 19 story points dag 1. De første par dage ligner ideallinjen, fordi de første opgaver (database-opsætning og auth) tog lidt tid at komme i gang med. Derefter falder kurven jævnt og ender på 0 dag 10."</p>
+  </div>
+
+  <div class="explain-box">
+    <h4>Tidsplan (Gantt)</h4>
+    <p>Gantt-diagrammet viser hele projektets tidslinje. Hvert arbejdsområde er en vandret bjælke der viser start- og slutdato. Det giver et overblik over, hvornår de forskellige dele af projektet er lavet.</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────── 5 -->
+<div class="section" id="usecase">
+  <div class="section-num">Afsnit 5</div>
+  <h2 class="sec-title">Use Case Model</h2>
+
+  <p>Use case modellen beskriver <strong>hvad systemet kan gøre set fra brugerens side</strong>. Det handler ikke om, hvordan det er implementeret — kun hvad man kan gøre med systemet.</p>
+
+  <h3 class="sub">Use Case Diagram</h3>
+  <div class="explain-box">
+    <h4>Elementer i diagrammet</h4>
+    <table>
+      <tr><th>Element</th><th>Udseende</th><th>Betydning</th></tr>
+      <tr><td>Aktør</td><td>Stregmand</td><td>Hvem bruger systemet. I projektet: Gæst, Bruger, Admin.</td></tr>
+      <tr><td>Use Case</td><td>Oval</td><td>En funktion systemet tilbyder. Fx "Forkorte URL".</td></tr>
+      <tr><td>Systemgrænse</td><td>Rektangel</td><td>Hvad der er inden for systemet (shr.dk).</td></tr>
+      <tr><td>Forbindelseslinje</td><td>Streg</td><td>Aktøren kan udføre den use case.</td></tr>
+    </table>
+  </div>
+
+  <div class="explain-box">
+    <h4>Aktørerne i shr.dk</h4>
+    <ul>
+      <li><strong>Gæst:</strong> Ikke logget ind. Kan oprette konto, logge ind og bruge et kort link (redirect).</li>
+      <li><strong>Bruger:</strong> Logget ind. Kan forkorte URLs, se dashboard, se statistik, slette links, password-beskytte links.</li>
+      <li><strong>Admin:</strong> Logget ind som admin. Kan se og administrere alle brugere og links i systemet.</li>
+    </ul>
+  </div>
+
+  <h3 class="sub">Use Case Beskrivelser</h3>
+  <div class="explain-box">
+    <h4>Hvad er en use case beskrivelse?</h4>
+    <p>En detaljeret gennemgang af én use case. Den indeholder:</p>
+    <ul>
+      <li><strong>Aktør:</strong> Hvem gør det</li>
+      <li><strong>Forudsætning (precondition):</strong> Hvad skal være sandt, inden use casen starter</li>
+      <li><strong>Hovedscenarie:</strong> Trinene i den normale forløb (happy path)</li>
+      <li><strong>Alternativt scenarie:</strong> Hvad sker der, når noget går galt</li>
+      <li><strong>Efterbetingelse (postcondition):</strong> Hvad er sandt, efter use casen er gennemført</li>
+    </ul>
+  </div>
+
+  <div class="explain-box">
+    <h4>Gennemgang af UC3: Forkorte URL</h4>
+    <p><strong>Forudsætning:</strong> Brugeren er logget ind (har et JWT-token).</p>
+    <p><strong>Trin 1–2:</strong> Brugeren taster en URL og klikker "Forkorte" i React-frontendet.</p>
+    <p><strong>Trin 3:</strong> Frontend sender en POST-request til <code>/api/urls/shorten</code> med JWT-tokenet i Authorization-headeren.</p>
+    <p><strong>Trin 4:</strong> Backend genererer et tilfældigt 6-tegns short code via <code>Math.random().toString(36).substring(2,8)</code>.</p>
+    <p><strong>Trin 5:</strong> Backend gemmer original_url, short_code og user_id i databasen.</p>
+    <p><strong>Trin 6:</strong> Det korte link vises for brugeren.</p>
+    <p><strong>Alternativt (4a):</strong> Hvis brugeren valgte et custom alias der allerede er i brug, returnerer databasen en uniqueness-fejl (SQL-fejlkode 23505), og systemet viser "Det alias er allerede taget".</p>
+  </div>
+
+  <div class="exam-box">
+    <h4>Til eksamen:</h4>
+    <p>"Use case modellen viser, hvad systemet kan gøre set fra brugernes perspektiv. Den siger intet om implementeringen — kun hvem der kan gøre hvad. Aktørerne er Gæst, Bruger og Admin. UC3 er forkorte URL — her kræves det, at man er logget ind."</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────── 6 -->
+<div class="section" id="domain">
+  <div class="section-num">Afsnit 6</div>
+  <h2 class="sec-title">Domænemodel</h2>
+
+  <p>Domænemodellen viser de vigtigste begreber (koncepter) i problemdomænet og relationerne imellem dem. Det er <strong>ikke en database</strong> og <strong>ikke en klasse i koden</strong> — det er en beskrivelse af virkeligheden.</p>
+
+  <div class="explain-box">
+    <h4>Forskel: Domænemodel vs. klassediagram vs. ER-diagram</h4>
+    <table>
+      <tr><th>Diagram</th><th>Handler om</th><th>Niveau</th></tr>
+      <tr><td>Domænemodel</td><td>Virkelighed — begreber og relationer i problemdomænet</td><td>Analyse</td></tr>
+      <tr><td>Designklassediagram</td><td>Softwaredesign — klasser, metoder, attributter i koden</td><td>Design</td></tr>
+      <tr><td>ER-diagram</td><td>Database — tabeller, kolonner, fremmednøgler</td><td>Database</td></tr>
+    </table>
+  </div>
+
+  <div class="explain-box">
+    <h4>De fire begreber i domænemodellen</h4>
+    <ul>
+      <li><strong>Bruger:</strong> En person der har oprettet en konto. Har navn, email, adgangskode, admin-flag og pro-flag.</li>
+      <li><strong>URL:</strong> Et forkortet link. Har original URL, short code, alias, klik-tæller, udløbsdato og evt. adgangskode.</li>
+      <li><strong>KlikHændelse:</strong> En registrering af at nogen klikker på et link. Gemmer tidspunkt, referrer og enhed.</li>
+      <li><strong>AdgangskodeNulstilling:</strong> Et midlertidigt token der bruges, når brugeren glemmer sit password.</li>
+    </ul>
+  </div>
+
+  <div class="explain-box">
+    <h4>Relationerne</h4>
+    <ul>
+      <li><strong>Bruger ejer 0..* URL'er:</strong> En bruger kan have mange links (eller ingen). Et link tilhører præcis én bruger.</li>
+      <li><strong>URL genererer 0..* KlikHændelser:</strong> Hvert klik på et link opretter en ny KlikHændelse.</li>
+      <li><strong>Bruger anmoder om 0..1 AdgangskodeNulstilling:</strong> En bruger kan have ét aktivt reset-token ad gangen.</li>
+    </ul>
+  </div>
+
+  <div class="exam-box">
+    <h4>Til eksamen:</h4>
+    <p>"Domænemodellen viser de fire centrale begreber i systemet. En bruger ejer mange links. Hvert klik på et link registreres som en KlikHændelse — det er det der giver statistikken. Modellen er uafhængig af implementering — den beskriver domænet, ikke koden."</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────── 7 -->
+<div class="section" id="aktivitet">
+  <div class="section-num">Afsnit 7</div>
+  <h2 class="sec-title">Aktivitetsdiagrammer</h2>
+
+  <p>Et aktivitetsdiagram viser <strong>flowet i en proces</strong> — trin for trin, med beslutninger og alternativer. Det svarer til et flowchart.</p>
+
+  <div class="explain-box">
+    <h4>Symboler i aktivitetsdiagrammer</h4>
+    <table>
+      <tr><th>Symbol</th><th>Navn</th><th>Betydning</th></tr>
+      <tr><td>Fyldt cirkel</td><td>Startnode</td><td>Her begynder processen</td></tr>
+      <tr><td>Rektangel (afrundet)</td><td>Aktivitet / Handling</td><td>Noget der sker — fx "Generer short code"</td></tr>
+      <tr><td>Diamant</td><td>Beslutningsnode</td><td>En betingelse — to eller flere udgange med "Ja/Nej"</td></tr>
+      <tr><td>Dobbelt cirkel</td><td>Slutnode</td><td>Her slutter processen</td></tr>
+      <tr><td>Pil</td><td>Transition</td><td>Rækkefølge / flow</td></tr>
+    </table>
+  </div>
+
+  <div class="explain-box">
+    <h4>Aktivitetsdiagram 1: Forkorte URL</h4>
+    <p>Viser hvad der sker, når en bruger forkorter en URL:</p>
+    <ol>
+      <li>Brugeren taster en lang URL</li>
+      <li><strong>Beslutning:</strong> Vil brugeren have et custom alias?
+        <ul>
+          <li>Ja → Tjek om alias allerede er taget → Fejlbesked eller fortsæt</li>
+          <li>Nej → Generer automatisk 6-tegns short code</li>
+        </ul>
+      </li>
+      <li>Gem linket i databasen</li>
+      <li>Returnér det korte link til brugeren</li>
+    </ol>
+  </div>
+
+  <div class="explain-box">
+    <h4>Aktivitetsdiagram 2: Redirect</h4>
+    <p>Viser hvad der sker, når nogen åbner et kort link (<code>shr.dk/r/abc123</code>):</p>
+    <ol>
+      <li>Server modtager GET-request</li>
+      <li><strong>Beslutning:</strong> Fandt vi short code i databasen? Nej → /not-found</li>
+      <li><strong>Beslutning:</strong> Er linket udløbet? Ja → /not-found?reason=expired</li>
+      <li><strong>Beslutning:</strong> Er linket password-beskyttet? Ja → /password/code</li>
+      <li>Gem click_event med referrer og user-agent</li>
+      <li>Opdater klik-tæller</li>
+      <li>HTTP 302 redirect til original URL</li>
+    </ol>
+  </div>
+
+  <div class="exam-box">
+    <h4>Til eksamen:</h4>
+    <p>"Aktivitetsdiagrammet for redirect viser tre mulige fejlsituationer: linket findes ikke, linket er udløbet, eller linket kræver adgangskode. I alle tre tilfælde redirectes brugeren til en fejlside. Hvis ingen af disse gælder, registreres klikket og brugeren sendes videre."</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────── 8 -->
+<div class="section" id="ssd">
+  <div class="section-num">Afsnit 8</div>
+  <h2 class="sec-title">Systemsekvensdiagrammer (SSD)</h2>
+
+  <p>Et systemsekvensdiagram viser <strong>den tidsmæssige rækkefølge</strong> af beskeder (kald) mellem aktører og systemet i ét scenarie fra en use case. Det viser præcist hvad der sker, og i hvilken rækkefølge.</p>
+
+  <div class="explain-box">
+    <h4>Elementer i et sekvensdiagram</h4>
+    <table>
+      <tr><th>Element</th><th>Betydning</th></tr>
+      <tr><td>Kasse øverst</td><td>Deltager (participant) — fx Bruger, Frontend, Backend, Database</td></tr>
+      <tr><td>Stiplet linje ned</td><td>Livslinjen (lifeline) — deltagerens eksistens over tid</td></tr>
+      <tr><td>Horisontal pil →</td><td>Besked/kald fra én deltager til en anden</td></tr>
+      <tr><td>Stiplet pil ←</td><td>Svar/retur besked</td></tr>
+      <tr><td>Tid</td><td>Bevæger sig nedad — øverst = tidligst</td></tr>
+    </table>
+  </div>
+
+  <div class="explain-box">
+    <h4>SSD 1: Registrer konto — gennemgang</h4>
+    <ol>
+      <li>Brugeren udfylder formularen og klikker "Opret"</li>
+      <li>Frontend sender <code>POST /api/auth/register</code> med navn, email og password til backend</li>
+      <li>Backend spørger databasen: "Findes der allerede en bruger med den email?"</li>
+      <li>Databasen svarer: tomt resultat (ingen bruger fundet)</li>
+      <li>Backend hasher passwordet med bcrypt: <code>bcrypt.hash(password, 10)</code></li>
+      <li>Backend indsætter den nye bruger i databasen</li>
+      <li>Backend genererer et JWT-token: <code>jwt.sign({userId}, JWT_SECRET, {expiresIn:'7d'})</code></li>
+      <li>Backend sender token + brugerinfo tilbage til frontend</li>
+      <li>Frontend gemmer token i localStorage og sender brugeren til dashboard</li>
+    </ol>
+  </div>
+
+  <div class="explain-box">
+    <h4>SSD 2: Forkorte URL — gennemgang</h4>
+    <ol>
+      <li>Bruger klikker "Forkorte" i frontend</li>
+      <li>Frontend sender <code>POST /api/urls/shorten</code> med <code>Authorization: Bearer &lt;token&gt;</code></li>
+      <li>Backend verificerer JWT-tokenet og henter userId</li>
+      <li>Backend genererer short_code: <code>Math.random().toString(36).substring(2,8)</code></li>
+      <li>Backend indsætter linket i databasen med original_url, short_code, user_id</li>
+      <li>Backend sender det gemte link tilbage</li>
+      <li>Frontend viser det korte link til brugeren</li>
+    </ol>
+  </div>
+
+  <div class="explain-box">
+    <h4>SSD 3: Redirect — gennemgang</h4>
+    <ol>
+      <li>Besøgende åbner <code>shr.dk/r/abc123</code></li>
+      <li>Backend slår short_code op i databasen</li>
+      <li>Database returnerer linkets data (original URL, udløbsdato, password-hash)</li>
+      <li>Backend tjekker udløbsdato og password — ingen begrænsninger</li>
+      <li>Backend opdaterer klik-tæller og gemmer click_event</li>
+      <li>Backend sender HTTP 302 redirect → original URL</li>
+    </ol>
+  </div>
+
+  <div class="exam-box">
+    <h4>Til eksamen — forskel på SSD og aktivitetsdiagram:</h4>
+    <p>"Aktivitetsdiagrammet viser <em>flowet</em> i en proces — beslutninger og forgreninger. Systemsekvensdiagrammet viser <em>hvem der taler med hvem og hvornår</em> — den præcise kommunikation mellem frontend, backend og database over tid."</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────── 9 -->
+<div class="section" id="arkitektur">
+  <div class="section-num">Afsnit 9</div>
+  <h2 class="sec-title">Systemarkitektur</h2>
+
+  <p>Systemarkitekturen viser, hvordan systemets komponenter er organiseret og kommunikerer med hinanden. shr.dk bruger en klassisk <strong>3-lags arkitektur</strong>.</p>
+
+  <div class="explain-box">
+    <h4>De tre lag</h4>
+    <table>
+      <tr><th>Lag</th><th>Teknologi</th><th>Ansvar</th></tr>
+      <tr><td>Præsentationslag</td><td>React + Vite (Vercel)</td><td>Det brugeren ser. Sider, formularer, knapper. Ingen forretningslogik.</td></tr>
+      <tr><td>Applikationslag</td><td>Node.js + Express</td><td>Forretningslogikken. Validering, JWT-check, generering af short codes, email-afsendelse.</td></tr>
+      <tr><td>Datalag</td><td>PostgreSQL</td><td>Lagring og hentning af data. Tabeller: users, urls, click_events, password_reset_tokens.</td></tr>
+    </table>
+  </div>
+
+  <div class="explain-box">
+    <h4>Kommunikation mellem lagene</h4>
+    <ul>
+      <li><strong>Frontend → Backend:</strong> HTTP REST API. JSON sendes frem og tilbage. Frontend ved ikke noget om databasen.</li>
+      <li><strong>Backend → Database:</strong> pg.Pool (PostgreSQL driver). Parameteriserede SQL-queries.</li>
+      <li><strong>Autentificering:</strong> JWT-token sendes i <code>Authorization: Bearer &lt;token&gt;</code> headeren ved hvert kald til beskyttede endpoints.</li>
+    </ul>
+  </div>
+
+  <div class="explain-box">
+    <h4>Middleware-kæden i Express</h4>
+    <p>En request til et beskyttet endpoint går igennem flere led:</p>
+    <p><code>Request → verifyToken middleware → [verifyAdmin middleware] → Route handler → Database → Response</code></p>
+    <p>Middleware er en funktion der kører <em>mellem</em> request og response. Den kan afvise requests (401/403) eller tilføje data til request-objektet (fx <code>req.userId</code>).</p>
+  </div>
+
+  <div class="why-box">
+    <h4>Hvorfor 3-lags arkitektur?</h4>
+    <p>Det adskiller ansvarsområder. Frontend ved ikke, hvordan data gemmes. Backend ved ikke, hvordan data vises. Databasen ved ikke, hvad brugeren gør. Det gør det lettere at ændre ét lag uden at ødelægge de andre.</p>
+  </div>
+
+  <div class="exam-box">
+    <h4>Til eksamen:</h4>
+    <p>"Systemet er bygget som en 3-lags arkitektur. Frontend er React deployet på Vercel og kommunikerer kun med backend via HTTP. Backend er Node.js/Express og håndterer al forretningslogik. Databasen er PostgreSQL og indeholder fire tabeller. Lagene er adskilt, så de ikke kender til hinandens implementering."</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────── 10 -->
+<div class="section" id="design">
+  <div class="section-num">Afsnit 10</div>
+  <h2 class="sec-title">Design</h2>
+
+  <h3 class="sub">Designklassediagram</h3>
+  <div class="explain-box">
+    <h4>Hvad viser et designklassediagram?</h4>
+    <p>Det viser softwarens klasser (eller i Node.js: moduler/objekter), deres attributter, metoder og relationer. Det er <em>tættere på koden</em> end domænemodellen.</p>
+    <p>I rapporten vises backend-klasserne: ExpressApp, AuthRouter, UrlRouter, AdminRouter, VerifyTokenMiddleware og Pool.</p>
+  </div>
+
+  <div class="explain-box">
+    <h4>Design Patterns brugt i projektet</h4>
+
+    <p><strong>Middleware Pattern (Chain of Responsibility):</strong></p>
+    <p>Når en request kommer ind til et beskyttet endpoint, kædes middleware-funktioner:</p>
+    <div class="code-box">app.use(<span class="string">'/api/urls'</span>, verifyToken, urlRoutes)
+<span class="comment">// verifyToken kører FØRST → tjekker JWT
+// Hvis token er gyldigt → går videre til urlRoutes
+// Hvis token er ugyldigt → stopper her med 401</span></div>
+    <p>Det er Chain of Responsibility: hvert led i kæden bestemmer, om det videresender requesten.</p>
+
+    <p><strong>Singleton Pattern:</strong></p>
+    <p>PostgreSQL-poolen oprettes én gang og deles af alle routes:</p>
+    <div class="code-box"><span class="comment">// Db.js — oprettes én gang, exporteres til alle routes</span>
+<span class="keyword">const</span> pool = <span class="keyword">new</span> Pool({ connectionString: ... })
+module.exports = pool</div>
+
+    <p><strong>MVC-inspireret struktur:</strong></p>
+    <p>Koden er opdelt i: routes/ (controllers), middleware/, Db.js (model). Ansvar er adskilt.</p>
+  </div>
+
+  <div class="exam-box">
+    <h4>Til eksamen:</h4>
+    <p>"Jeg har brugt Middleware Pattern til autentificering — det er en form for Chain of Responsibility. En request til /api/urls skal igennem verifyToken-middleware, som tjekker JWT-tokenet, inden den når routeren. Det giver genbrugelig autentificering på tværs af alle beskyttede endpoints."</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────── 11 -->
+<div class="section" id="database">
+  <div class="section-num">Afsnit 11</div>
+  <h2 class="sec-title">Database Design</h2>
+
+  <h3 class="sub">ER-diagram</h3>
+  <div class="explain-box">
+    <h4>Hvad er et ER-diagram?</h4>
+    <p>ER = Entity-Relationship. Diagrammet viser databasens tabeller (entities) og relationerne imellem dem via fremmednøgler.</p>
+  </div>
+
+  <div class="explain-box">
+    <h4>De fire tabeller</h4>
+
+    <p><strong>users</strong></p>
+    <ul>
+      <li><code>id</code> — primærnøgle, auto-increment</li>
+      <li><code>email</code> — UNIQUE constraint, man kan ikke have to konti med samme email</li>
+      <li><code>password_hash</code> — bcrypt-hash, aldrig klar tekst</li>
+      <li><code>is_admin</code>, <code>is_pro</code> — boolean flags til roller</li>
+    </ul>
+
+    <p><strong>urls</strong></p>
+    <ul>
+      <li><code>user_id</code> — fremmednøgle til users.id. Et link tilhører én bruger.</li>
+      <li><code>short_code</code> — UNIQUE. To links kan ikke have samme kode.</li>
+      <li><code>expires_at</code> — nullable. NULL betyder "udløber aldrig".</li>
+      <li><code>password_hash</code> — nullable. NULL betyder "ikke password-beskyttet".</li>
+      <li><code>clicks</code> — tæller hvor mange gange linket er brugt (opdateres ved redirect).</li>
+    </ul>
+
+    <p><strong>click_events</strong></p>
+    <ul>
+      <li><code>url_id</code> — fremmednøgle til urls.id. Hvert klik hører til ét link.</li>
+      <li><code>referrer</code> — hvilken side brugeren kom fra (kan være NULL).</li>
+      <li><code>user_agent</code> — browserens user-agent string (bruges til at detektere mobil/desktop).</li>
+    </ul>
+
+    <p><strong>password_reset_tokens</strong></p>
+    <ul>
+      <li>Bruges til "Glemt adgangskode" flowet. Et token genereres, sendes via email, og bruges én gang.</li>
+      <li><code>used</code> — boolean. Når tokenet er brugt, markeres det som brugt så det ikke kan genbruges.</li>
+      <li><code>expires_at</code> — tokenet udløber efter 1 time.</li>
+    </ul>
+  </div>
+
+  <div class="explain-box">
+    <h4>Primærnøgler og fremmednøgler</h4>
+    <p><span class="term">Primærnøgle (PK):</span> En kolonne der entydigt identificerer hver række i en tabel. I alle tabeller er det <code>id</code> med SERIAL (auto-increment).</p>
+    <p><span class="term">Fremmednøgle (FK):</span> En kolonne der refererer til primærnøglen i en anden tabel. <code>urls.user_id</code> refererer til <code>users.id</code>. Det sikrer at man ikke kan have et link, der tilhører en bruger der ikke eksisterer.</p>
+  </div>
+
+  <div class="why-box">
+    <h4>Hvorfor PostgreSQL og ikke fx SQLite?</h4>
+    <p>PostgreSQL er valgt fordi datamodellen er klart relationel — links tilhører brugere og klik tilhører links. PostgreSQL understøtter fremmednøgler, UNIQUE constraints og komplekse SQL-queries (fx GROUP BY og INTERVAL) som bruges i statistik-endpointet. SQLite er simplere men ikke egnet til produktion med concurrent brugere.</p>
+  </div>
+
+  <div class="exam-box">
+    <h4>Til eksamen:</h4>
+    <p>"Databasen har fire tabeller. urls.user_id er en fremmednøgle til users.id — det sikrer at hvert link tilhører en bruger. click_events.url_id er en fremmednøgle til urls.id — det giver mulighed for at hente alle klik for et specifikt link, som brugt i statistik-endpointet."</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────── 12 -->
+<div class="section" id="impl">
+  <div class="section-num">Afsnit 12</div>
+  <h2 class="sec-title">Implementation</h2>
+
+  <h3 class="sub">Database forbindelsen (Db.js)</h3>
+  <div class="explain-box">
+    <h4>Hvad gør Db.js?</h4>
+    <p>Opretter én pg.Pool-forbindelse til PostgreSQL. Pool betyder, at den holder flere åbne forbindelser klar, så mange requests kan køre parallelt uden at vente på hinanden.</p>
+    <p>Den tjekker om <code>DATABASE_URL</code> miljøvariablen er sat (som den er på Vercel/cloud) — ellers bruger den separate host/port/database variabler (lokal udvikling).</p>
+  </div>
+
+  <h3 class="sub">JWT Middleware</h3>
+  <div class="explain-box">
+    <h4>Hvad sker der i verifyToken?</h4>
+    <div class="code-box"><span class="comment">// Henter token fra "Authorization: Bearer &lt;token&gt;" headeren</span>
+<span class="keyword">const</span> token = req.headers[<span class="string">'authorization'</span>]?.split(<span class="string">' '</span>)[1]
+
+<span class="comment">// jwt.verify() dekoder tokenet og tjekker signaturen
+// Hvis tokenet er ændret eller udløbet → fejl → 401</span>
+<span class="keyword">const</span> decoded = jwt.verify(token, process.env.JWT_SECRET)
+
+<span class="comment">// Gem userId på request-objektet, så næste funktion kan bruge det</span>
+req.userId = decoded.userId
+next() <span class="comment">// Gå videre til næste middleware/route</span></div>
+    <p><strong>JWT = JSON Web Token.</strong> Det er en signeret streng opdelt i tre dele: header, payload og signature. Man kan ikke ændre payload'en uden at ugyldiggøre signaturen — det er det der gør det sikkert.</p>
+  </div>
+
+  <h3 class="sub">Redirect-endpointet</h3>
+  <div class="explain-box">
+    <h4>Det vigtigste endpoint i hele systemet</h4>
+    <p>Dette endpoint håndterer al trafik til korte links. Det er det eneste offentlige endpoint (kræver ikke JWT). Det:</p>
+    <ol>
+      <li>Slår short_code op i databasen</li>
+      <li>Tjekker tre betingelser: ikke fundet / udløbet / password-beskyttet</li>
+      <li>Gemmer click_event med referrer og user-agent</li>
+      <li>Opdaterer klik-tæller</li>
+      <li>Sender HTTP 302 redirect</li>
+    </ol>
+    <p><strong>HTTP 302</strong> betyder "midlertidig omdirigering". Browseren følger automatisk Location-headeren til den nye adresse.</p>
+  </div>
+
+  <h3 class="sub">Short code generering</h3>
+  <div class="explain-box">
+    <h4>Hvordan genereres short codes?</h4>
+    <div class="code-box"><span class="keyword">const</span> short_code = custom_alias || Math.random().toString(<span class="string">36</span>).substring(<span class="string">2</span>, <span class="string">8</span>)</div>
+    <p><code>Math.random()</code> genererer et tal mellem 0 og 1, fx <code>0.7823456</code>.</p>
+    <p><code>.toString(36)</code> konverterer til base-36 (0-9 og a-z), fx <code>"0.r2x4k9"</code>.</p>
+    <p><code>.substring(2, 8)</code> tager 6 tegn efter "0.", fx <code>"r2x4k9"</code>.</p>
+    <p>Resultatet er en 6-tegns alphanumerisk kode. Hvis brugeren har valgt et custom alias, bruges det i stedet.</p>
+  </div>
+
+  <h3 class="sub">bcrypt og password-sikkerhed</h3>
+  <div class="explain-box">
+    <h4>Hvorfor bcrypt?</h4>
+    <p>bcrypt er en hash-funktion designet til adgangskoder. Den er bevidst langsom (salt rounds = 10 betyder 2^10 = 1024 iterationer) for at gøre brute-force angreb dyre.</p>
+    <p>Adgangskoden gemmes <em>aldrig</em> i klar tekst. Kun hashen gemmes. Ved login bruges <code>bcrypt.compare(inputPassword, storedHash)</code> — det sammenligner uden at "dehashes".</p>
+  </div>
+
+  <div class="exam-box">
+    <h4>Til eksamen:</h4>
+    <p>"Short codes genereres tilfældigt med Math.random() konverteret til base-36, som giver 6 alfanumeriske tegn. Adgangskoder hashes med bcrypt inden de gemmes — det er et krav fra IFK-01. JWT-tokenet bruges til at identificere brugeren ved hvert API-kald — middleware verificerer tokenet og lægger userId på request-objektet."</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────── 13 -->
+<div class="section" id="test">
+  <div class="section-num">Afsnit 13</div>
+  <h2 class="sec-title">Test</h2>
+
+  <h3 class="sub">Teststrategier</h3>
+  <div class="explain-box">
+    <h4>Black-box test (funktionel test)</h4>
+    <p>Man tester et endpoint uden at kende den interne implementering. Man sender et input og tjekker output. Det er det der bruges til API-test i rapporten — send en HTTP-request, tjek HTTP-statuskode og svaret.</p>
+  </div>
+
+  <div class="explain-box">
+    <h4>Grænseværditest</h4>
+    <p>Tester ved kantsituationer — hvad sker der ved udløbne links (TC-10), forkerte adgangskoder (TC-13), manglende token (TC-06)? Disse er vigtige fordi de fleste fejl opstår i grænsetilfælde.</p>
+  </div>
+
+  <div class="explain-box">
+    <h4>Sikkerhedstest</h4>
+    <ul>
+      <li><strong>ST-01 SQL Injection:</strong> Input <code>' OR 1=1; --</code> i email-feltet. Parameteriserede queries ($1, $2...) forhindrer det — inputtet behandles som data, ikke som SQL-kode.</li>
+      <li><strong>ST-02 JWT-manipulation:</strong> Ændres payload-delen af et token, ugyldiggøres signaturen. jwt.verify() afviser det.</li>
+      <li><strong>ST-04 Adgangskontrol:</strong> Man kan kun slette sine egne links fordi SQL-queriet indeholder <code>WHERE id=$1 AND user_id=$2</code> — begge skal matche.</li>
+    </ul>
+  </div>
+
+  <div class="explain-box">
+    <h4>Sammenhæng: krav → test</h4>
+    <p>Hvert test case er koblet til et funktionelt krav:</p>
+    <ul>
+      <li>FK-03 (forkorte URL) → TC-05 (gyldig URL + JWT → 201), TC-06 (ingen JWT → 401)</li>
+      <li>FK-04 (redirect) → TC-08 (gyldigt link → 302), TC-09 (ikke-eksisterende → /not-found)</li>
+      <li>IFK-03 (SQL-sikkerhed) → ST-01 (injection forsøg afvises)</li>
+    </ul>
+  </div>
+
+  <div class="exam-box">
+    <h4>Til eksamen:</h4>
+    <p>"Alle testcases er black-box tests — jeg tester endpointets adfærd udefra. TC-12 tester at man ikke kan slette en anden brugers link. Det er fordi SQL-queriet kræver at både id OG user_id matcher. Selv om man kender ID'et på et fremmed link, kan man ikke slette det."</p>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────── 14 -->
+<div class="section" id="refleksion">
+  <div class="section-num">Afsnit 14</div>
+  <h2 class="sec-title">Refleksion og Konklusion</h2>
+
+  <p>Refleksionsafsnittet er vigtigt til eksamen. Her viser du, at du <em>forstår</em> hvad du har lavet — ikke bare at du har gjort det.</p>
+
+  <h3 class="sub">Sammenhæng i projektet</h3>
+  <div class="explain-box">
+    <h4>Sporbarhed fra krav til test</h4>
+    <p>SEP2 kræver en "tydelig sammenhæng mellem krav, analyse, design, implementation, test og dokumentation." Rapporten viser det konkret:</p>
+    <table>
+      <tr><th>Krav</th><th>Use Case</th><th>SSD</th><th>Endpoint</th><th>Test</th></tr>
+      <tr><td>FK-01</td><td>UC1</td><td>SSD 8.1</td><td>POST /register</td><td>TC-01, TC-02</td></tr>
+      <tr><td>FK-03</td><td>UC3</td><td>SSD 8.2</td><td>POST /shorten</td><td>TC-05, TC-06</td></tr>
+      <tr><td>FK-04</td><td>UC6</td><td>SSD 8.3</td><td>GET /r/:code</td><td>TC-08, TC-09</td></tr>
+      <tr><td>IFK-03</td><td>–</td><td>–</td><td>Parameteriserede queries</td><td>ST-01</td></tr>
+    </table>
+  </div>
+
+  <h3 class="sub">Teknologivalg</h3>
+  <div class="explain-box">
+    <h4>Spørgsmål du kan få til eksamen</h4>
+    <p><strong>"Hvorfor Node.js og ikke fx Java?"</strong><br>
+    JavaScript bruges allerede på frontend (React), så én teknologistak giver ensartet erfaring og fælles viden om asynkron programmering. Node.js er desuden velegnet til I/O-tunge applikationer som API-servere.</p>
+
+    <p><strong>"Hvorfor JWT og ikke sessions?"</strong><br>
+    JWT er stateless — serveren gemmer intet om sessioner. Tokenet indeholder al nødvendig information (userId) og er kryptografisk signeret. Det fungerer godt med en separat frontend deployet på Vercel, da der ikke er delt server-state.</p>
+
+    <p><strong>"Hvorfor PostgreSQL og ikke MongoDB?"</strong><br>
+    Datamodellen er klart relationel: brugere ejer links, links genererer klik-hændelser. Relationelle databaser med fremmednøgler og JOIN er velegnet til dette. MongoDB (NoSQL) passer bedre til ustrukturerede eller dokumentbaserede data.</p>
+
+    <p><strong>"Hvad kunne gøres bedre?"</strong><br>
+    Tests burde have været skrevet løbende (TDD). Input-validering på URL-feltet mangler. Statistik-komponenten var den mest tidskrævende del — den kunne have været prioriteret anderledes i sprint-planlægningen.</p>
+  </div>
+
+  <h3 class="sub">Scrum i soloprojekt</h3>
+  <div class="explain-box">
+    <h4>Hvad fungerede / hvad fungerede ikke?</h4>
+    <p><strong>Fungerede godt:</strong> Sprint-strukturen gav naturlige checkpoints og tvang til prioritering. Sprint 0 til analyse sikrede, at koden ikke startede på usikker grund.</p>
+    <p><strong>Fungerede mindre godt:</strong> De sociale aspekter af Scrum (teamkoordination, standups) er meningsløse i et soloprojekt. Burndown-chartet er mere nyttigt i et team, hvor man kan se om andre er bagud.</p>
+  </div>
+
+  <div class="exam-box">
+    <h4>Generelle råd til eksamen</h4>
+    <ul>
+      <li>Brug konkrete eksempler fra rapporten — "det kan ses på side X / figur Y"</li>
+      <li>Forbind altid det tekniske til et krav — "dette implementerer FK-03"</li>
+      <li>Kend sammenhængen: domænemodel → ER-diagram → kode (de tre beskriver det samme, på tre niveauer)</li>
+      <li>Kend forskellen: aktivitetsdiagram (flow/beslutninger) vs. sekvensdiagram (hvem taler med hvem)</li>
+      <li>Kend design patterns: middleware pattern, singleton</li>
+      <li>Kend sikkerhedsaspekterne: bcrypt, JWT, parameteriserede queries</li>
+    </ul>
+  </div>
+</div>
+
+<div style="margin-top:40px; padding-top:20px; border-top:2px solid #e9d5ff; font-size:9pt; color:#6b7280; text-align:center; margin-bottom:40px;">
+  Forklaring af SEP2 rapport — URL Shortener (shr.dk) · Abdirahman Isse Ibrahim Mahamed · 2026
+</div>
+
+</div>
+
+<script>
+// Highlight active sidebar link on scroll
+const sections = document.querySelectorAll('.section[id]');
+const links = document.querySelectorAll('.sidebar a');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => {
+    if (window.scrollY >= s.offsetTop - 80) current = s.id;
+  });
+  links.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+});
+</script>
+</body>
+</html>

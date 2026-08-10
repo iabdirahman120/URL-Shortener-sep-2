@@ -1,2 +1,18 @@
+# dependencies
+node_modules/
+**/node_modules/
+
+# vercel
 .vercel
+
+# env
+.env
 .env*.local
+
+# byg-output
+Fe/dist/
+dist/
+
+# macOS
+.DS_Store
+**/.DS_Store

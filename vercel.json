@@ -1,10 +1,25 @@
 {
   "version": 2,
-  "buildCommand": "cd Fe && npm install && npm run build",
+  "buildCommand": "cd Be && npm install && cd ../Fe && npm install && npm run build",
   "outputDirectory": "Fe/dist",
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/index" },
+
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/admin", "destination": "/index.html" },
+    { "source": "/dashboard", "destination": "/index.html" },
+    { "source": "/docs", "destination": "/index.html" },
+    { "source": "/settings", "destination": "/index.html" },
+    { "source": "/login", "destination": "/index.html" },
+    { "source": "/register", "destination": "/index.html" },
+    { "source": "/forgot-password", "destination": "/index.html" },
+    { "source": "/reset-password", "destination": "/index.html" },
+    { "source": "/privacy", "destination": "/index.html" },
+    { "source": "/terms", "destination": "/index.html" },
+    { "source": "/not-found", "destination": "/index.html" },
+    { "source": "/password/:short_code", "destination": "/index.html" },
+
     { "source": "/r/:short_code", "destination": "/api/index" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/:short_code", "destination": "/api/index" }
   ]
 }
