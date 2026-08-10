@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const pool = require('../Db')
+const bcrypt = require('bcrypt')
 
 // Samlet statistik
 router.get('/stats', async (req, res) => {
@@ -36,6 +37,30 @@ router.get('/users', async (req, res) => {
         res.json(result.rows)
     } catch (error) {
         console.error('Admin users error:', error)
+        res.status(500).json({ message: 'Serverfejl' })
+    }
+})
+
+// Opret bruger (admin)
+router.post('/users', async (req, res) => {
+    const { navn, email, password, is_pro, is_admin } = req.body
+    if (!email || !password) {
+        return res.status(400).json({ message: 'Email og adgangskode er påkrævet' })
+    }
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10)
+        const result = await pool.query(
+            `INSERT INTO users (navn, email, password_hash, is_pro, is_admin)
+             VALUES ($1, $2, $3, $4, $5)
+             RETURNING id, navn, email, is_pro, is_admin, created_at`,
+            [navn || null, email, hashedPassword, is_pro === true, is_admin === true]
+        )
+        res.status(201).json(result.rows[0])
+    } catch (error) {
+        if (error.code === '23505') {
+            return res.status(400).json({ message: 'Emailen er allerede i brug' })
+        }
+        console.error('Admin create user error:', error)
         res.status(500).json({ message: 'Serverfejl' })
     }
 })

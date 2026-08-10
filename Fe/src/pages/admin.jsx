@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Navbar } from '@/components/Navbar'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Users, Link2, MousePointerClick, Trash2, Crown, ExternalLink } from 'lucide-react'
+import { Users, Link2, MousePointerClick, Trash2, Crown, ExternalLink, UserPlus } from 'lucide-react'
 
 const token = () => localStorage.getItem('token')
 
@@ -12,6 +12,10 @@ export default function Admin() {
     const [users, setUsers] = useState([])
     const [links, setLinks] = useState([])
     const [loading, setLoading] = useState(true)
+    const [showCreate, setShowCreate] = useState(false)
+    const [form, setForm] = useState({ navn: '', email: '', password: '', is_pro: false, is_admin: false })
+    const [createError, setCreateError] = useState('')
+    const [creating, setCreating] = useState(false)
 
     useEffect(() => {
         Promise.all([
@@ -45,6 +49,28 @@ export default function Admin() {
         })
         const data = await res.json()
         setUsers(users.map(u => u.id === id ? { ...u, is_pro: data.is_pro } : u))
+    }
+
+    const createUser = async (e) => {
+        e.preventDefault()
+        setCreateError('')
+        setCreating(true)
+        try {
+            const res = await fetch('/api/admin/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+                body: JSON.stringify(form),
+            })
+            const data = await res.json()
+            if (!res.ok) { setCreateError(data.message || 'Kunne ikke oprette bruger'); return }
+            setUsers([{ ...data, link_count: 0, total_clicks: 0 }, ...users])
+            setForm({ navn: '', email: '', password: '', is_pro: false, is_admin: false })
+            setShowCreate(false)
+        } catch {
+            setCreateError('Noget gik galt')
+        } finally {
+            setCreating(false)
+        }
     }
 
     return (
@@ -117,9 +143,40 @@ export default function Admin() {
                     <div className="text-sm text-muted-foreground py-10 text-center">Henter data...</div>
                 ) : tab === 'users' ? (
                     <Card>
-                        <CardHeader>
+                        <CardHeader className="flex flex-row items-center justify-between">
                             <CardTitle className="text-base">Alle brugere</CardTitle>
+                            <Button size="sm" onClick={() => setShowCreate(v => !v)}>
+                                <UserPlus className="w-4 h-4 mr-1.5" />
+                                Ny bruger
+                            </Button>
                         </CardHeader>
+                        {showCreate && (
+                            <CardContent className="border-b pb-5">
+                                <form onSubmit={createUser} className="flex flex-col gap-3 max-w-md">
+                                    <input className="border rounded-md px-3 py-2 text-sm bg-background" placeholder="Navn"
+                                        value={form.navn} onChange={e => setForm({ ...form, navn: e.target.value })} />
+                                    <input className="border rounded-md px-3 py-2 text-sm bg-background" type="email" placeholder="Email" required
+                                        value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
+                                    <input className="border rounded-md px-3 py-2 text-sm bg-background" type="password" placeholder="Adgangskode" required
+                                        value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
+                                    <div className="flex gap-4 text-sm">
+                                        <label className="flex items-center gap-2">
+                                            <input type="checkbox" checked={form.is_pro} onChange={e => setForm({ ...form, is_pro: e.target.checked })} />
+                                            Pro
+                                        </label>
+                                        <label className="flex items-center gap-2">
+                                            <input type="checkbox" checked={form.is_admin} onChange={e => setForm({ ...form, is_admin: e.target.checked })} />
+                                            Admin
+                                        </label>
+                                    </div>
+                                    {createError && <p className="text-sm text-destructive">{createError}</p>}
+                                    <div className="flex gap-2">
+                                        <Button type="submit" size="sm" disabled={creating}>{creating ? 'Opretter...' : 'Opret bruger'}</Button>
+                                        <Button type="button" size="sm" variant="ghost" onClick={() => { setShowCreate(false); setCreateError('') }}>Annuller</Button>
+                                    </div>
+                                </form>
+                            </CardContent>
+                        )}
                         <CardContent className="p-0">
                             <div className="overflow-x-auto">
                                 <table className="w-full text-sm">
