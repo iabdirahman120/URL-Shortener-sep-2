@@ -81,10 +81,7 @@ export default function Login() {
                             </Button>
                         </form>
                         <p className="text-sm text-center text-muted-foreground mt-5">
-                            Har du ikke en konto?{' '}
-                            <Link to="/register" className="text-primary hover:underline font-medium">
-                                Opret konto
-                            </Link>
+                            Ingen konto? Kontakt en administrator for at få adgang.
                         </p>
                     </CardContent>
                 </Card>

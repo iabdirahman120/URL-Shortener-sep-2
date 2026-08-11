@@ -76,14 +76,9 @@ export function Navbar() {
                             <Button size="sm" variant="outline" onClick={handleLogout}>Log ud</Button>
                         </>
                     ) : (
-                        <>
-                            <Link to="/login">
-                                <Button variant="ghost" size="sm">Log ind</Button>
-                            </Link>
-                            <Link to="/register">
-                                <Button size="sm">Opret konto</Button>
-                            </Link>
-                        </>
+                        <Link to="/login">
+                            <Button size="sm">Log ind</Button>
+                        </Link>
                     )}
                 </div>
             </div>

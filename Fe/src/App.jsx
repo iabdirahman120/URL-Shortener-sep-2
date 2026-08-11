@@ -1,6 +1,5 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import Login from './pages/login'
-import Register from './pages/register'
 import Dashboard from './pages/dashboard'
 import Forside from './pages/forside'
 import Settings from './pages/settings'
@@ -18,7 +17,8 @@ function App() {
     <Routes>
       <Route path="/" element={<Forside />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+      {/* Offentlig registrering er lukket — kun admin opretter brugere. Send til login. */}
+      <Route path="/register" element={<Navigate to="/login" replace />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/settings" element={<Settings />} />
       <Route path="/admin" element={<Admin />} />

@@ -37,6 +37,11 @@ async function sendResetEmail(toEmail, resetUrl) {
 }
 
 router.post('/register', async (req, res) => {
+    // Offentlig selv-registrering er lukket. Kun en admin kan oprette brugere
+    // (via admin-panelet / POST /api/admin/users).
+    return res.status(403).json({ message: 'Registrering er lukket. Kontakt en administrator for at få en konto.' })
+
+    // eslint-disable-next-line no-unreachable
     const { navn, email, password } = req.body
     try {
         const hashedPassword = await bcrypt.hash(password, 10)
