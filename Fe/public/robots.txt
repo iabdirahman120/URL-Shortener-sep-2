@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+# Private/funktionelle sider — skal ikke indekseres
+Disallow: /dashboard
+Disallow: /admin
+Disallow: /settings
+Disallow: /reset-password
+Disallow: /forgot-password
+Disallow: /r/
+Disallow: /password/
+Disallow: /api/
+
+Sitemap: https://shr.dk/sitemap.xml

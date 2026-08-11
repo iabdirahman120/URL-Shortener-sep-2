@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Navbar } from '@/components/Navbar'
+import { useSEO } from '@/hooks/useSEO'
 import {
     Link2, BarChart2, Zap, Globe, Code2, QrCode,
     Clock, ChevronRight, Play, Check, Lock
@@ -70,6 +71,10 @@ const proFeatures = [
 ]
 
 export default function Forside() {
+    useSEO(
+        'shr.dk — Gratis URL-forkorter med statistik, QR-koder og API',
+        'Forkort dine links gratis med shr.dk. Følg klik-statistik, lav QR-koder, opret password-beskyttede links og brug vores REST API. Hurtigt, dansk og gratis.'
+    )
     const [url, setUrl] = useState('')
     const navigate = useNavigate()
     const token = localStorage.getItem('token')
