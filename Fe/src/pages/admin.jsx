@@ -157,8 +157,9 @@ export default function Admin() {
                                         value={form.navn} onChange={e => setForm({ ...form, navn: e.target.value })} />
                                     <input className="border rounded-md px-3 py-2 text-sm bg-background" type="email" placeholder="Email" required
                                         value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
-                                    <input className="border rounded-md px-3 py-2 text-sm bg-background" type="password" placeholder="Adgangskode" required
+                                    <input className="border rounded-md px-3 py-2 text-sm bg-background" type="text" placeholder="Adgangskode (standard: 123)"
                                         value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
+                                    <p className="text-xs text-muted-foreground -mt-1">Lad stå tom for standard-koden <strong>123</strong>. Brugeren kan selv skifte den bagefter.</p>
                                     <div className="flex gap-4 text-sm">
                                         <label className="flex items-center gap-2">
                                             <input type="checkbox" checked={form.is_pro} onChange={e => setForm({ ...form, is_pro: e.target.checked })} />

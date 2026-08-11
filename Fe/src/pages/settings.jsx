@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Navbar } from "@/components/Navbar"
-import { Copy, RefreshCw, Check, Zap } from "lucide-react"
+import { Copy, RefreshCw, Check, Zap, Lock } from "lucide-react"
 
 function CopyButton({ text }) {
     const [copied, setCopied] = useState(false)
@@ -23,8 +23,33 @@ export default function Settings() {
     const [isPro, setIsPro] = useState(false)
     const [loading, setLoading] = useState(true)
     const [regenerating, setRegenerating] = useState(false)
+    const [pwCurrent, setPwCurrent] = useState("")
+    const [pwNew, setPwNew] = useState("")
+    const [pwMsg, setPwMsg] = useState(null)
+    const [pwSaving, setPwSaving] = useState(false)
 
     const token = localStorage.getItem('token')
+
+    const handleChangePassword = async (e) => {
+        e.preventDefault()
+        setPwMsg(null)
+        setPwSaving(true)
+        try {
+            const res = await fetch('/api/auth/change-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ currentPassword: pwCurrent, newPassword: pwNew }),
+            })
+            const data = await res.json()
+            if (!res.ok) { setPwMsg({ ok: false, text: data.message || 'Kunne ikke ændre adgangskode.' }); return }
+            setPwMsg({ ok: true, text: 'Adgangskode ændret.' })
+            setPwCurrent(""); setPwNew("")
+        } catch {
+            setPwMsg({ ok: false, text: 'Noget gik galt.' })
+        } finally {
+            setPwSaving(false)
+        }
+    }
 
     useEffect(() => {
         Promise.all([
@@ -62,6 +87,31 @@ export default function Settings() {
             <Navbar />
             <div className="max-w-2xl mx-auto w-full px-6 py-10 flex flex-col gap-6">
                 <h1 className="text-2xl font-bold text-foreground">Indstillinger</h1>
+
+                {/* Skift adgangskode */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                            <Lock className="w-4 h-4 text-primary" />
+                            Skift adgangskode
+                        </CardTitle>
+                        <CardDescription>Har du fået en standard-kode? Skift den til din egen her.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <form onSubmit={handleChangePassword} className="flex flex-col gap-3 max-w-sm">
+                            <input type="password" placeholder="Nuværende adgangskode" required
+                                className="border rounded-md px-3 py-2 text-sm bg-background"
+                                value={pwCurrent} onChange={e => setPwCurrent(e.target.value)} />
+                            <input type="password" placeholder="Ny adgangskode" required
+                                className="border rounded-md px-3 py-2 text-sm bg-background"
+                                value={pwNew} onChange={e => setPwNew(e.target.value)} />
+                            {pwMsg && <p className={`text-sm ${pwMsg.ok ? 'text-primary' : 'text-destructive'}`}>{pwMsg.text}</p>}
+                            <Button type="submit" size="sm" disabled={pwSaving} className="self-start">
+                                {pwSaving ? 'Gemmer...' : 'Skift adgangskode'}
+                            </Button>
+                        </form>
+                    </CardContent>
+                </Card>
 
                 {/* Subscription status */}
                 <Card>

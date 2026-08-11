@@ -44,11 +44,12 @@ router.get('/users', async (req, res) => {
 // Opret bruger (admin)
 router.post('/users', async (req, res) => {
     const { navn, email, password, is_pro, is_admin } = req.body
-    if (!email || !password) {
-        return res.status(400).json({ message: 'Email og adgangskode er påkrævet' })
+    if (!email) {
+        return res.status(400).json({ message: 'Email er påkrævet' })
     }
     try {
-        const hashedPassword = await bcrypt.hash(password, 10)
+        // Default-adgangskode "123" hvis admin ikke angiver en. Brugeren skifter den selv bagefter.
+        const hashedPassword = await bcrypt.hash(password || '123', 10)
         const result = await pool.query(
             `INSERT INTO users (navn, email, password_hash, is_pro, is_admin)
              VALUES ($1, $2, $3, $4, $5)

@@ -5,6 +5,7 @@ const crypto = require('crypto')
 const pool = require('../Db')
 const jwt = require('jsonwebtoken')
 const nodemailer = require('nodemailer')
+const verifyToken = require('../middleware/auth')
 
 async function sendResetEmail(toEmail, resetUrl) {
     if (!process.env.SMTP_HOST || !process.env.SMTP_USER) {
@@ -126,6 +127,29 @@ router.post('/reset-password', async (req, res) => {
     } catch (error) {
         console.error('Reset password error:', error)
         res.status(500).json({ error: 'Internal server error' })
+    }
+})
+
+// Skift egen adgangskode (kræver login). Bruges fx efter admin har givet default "123".
+router.post('/change-password', verifyToken, async (req, res) => {
+    const { currentPassword, newPassword } = req.body
+    if (!currentPassword || !newPassword) {
+        return res.status(400).json({ message: 'Udfyld både nuværende og ny adgangskode.' })
+    }
+    if (newPassword.length < 4) {
+        return res.status(400).json({ message: 'Ny adgangskode skal være mindst 4 tegn.' })
+    }
+    try {
+        const result = await pool.query('SELECT password_hash FROM users WHERE id = $1', [req.userId])
+        if (result.rows.length === 0) return res.status(404).json({ message: 'Bruger ikke fundet.' })
+        const valid = await bcrypt.compare(currentPassword, result.rows[0].password_hash)
+        if (!valid) return res.status(400).json({ message: 'Nuværende adgangskode er forkert.' })
+        const newHash = await bcrypt.hash(newPassword, 10)
+        await pool.query('UPDATE users SET password_hash = $1 WHERE id = $2', [newHash, req.userId])
+        res.json({ message: 'Adgangskode ændret.' })
+    } catch (error) {
+        console.error('Change password error:', error)
+        res.status(500).json({ message: 'Internal server error' })
     }
 })
 
