@@ -184,6 +184,7 @@ export default function Dashboard() {
     const [url, setUrl] = useState("")
     const [customAlias, setCustomAlias] = useState("")
     const [expiresAt, setExpiresAt] = useState("")
+    const [protect, setProtect] = useState(false)
     const [password, setPassword] = useState("")
     const [qrUrl, setQrUrl] = useState(null)
     const [statsLink, setStatsLink] = useState(null)
@@ -221,12 +222,12 @@ export default function Dashboard() {
             const response = await fetch('/api/urls/shorten', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ originalUrl: url, custom_alias: customAlias || undefined, expires_at: expiresAt || undefined, password: password || undefined })
+                body: JSON.stringify({ originalUrl: url, custom_alias: customAlias || undefined, expires_at: expiresAt || undefined, password: (protect && password) ? password : undefined })
             })
             const data = await response.json()
             if (!response.ok) { alert(data.error || 'Noget gik galt.'); return }
             setLinks([data, ...links])
-            setUrl(""); setCustomAlias(""); setExpiresAt(""); setPassword("")
+            setUrl(""); setCustomAlias(""); setExpiresAt(""); setProtect(false); setPassword("")
             setShowOnboarding(false)
             setSuccess(`Link oprettet: shr.dk/${data.short_code}`)
             setTimeout(() => setSuccess(""), 4000)
@@ -378,10 +379,8 @@ export default function Dashboard() {
                     <CardContent>
                         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
                             <Input type="url" placeholder="Indsæt din lange URL..." value={url} onChange={e => setUrl(e.target.value)} required />
-                            <div className="flex gap-3">
-                                <Input type="text" placeholder="Custom alias (valgfrit)" value={customAlias} onChange={e => setCustomAlias(e.target.value)} />
-                                <Input type="password" placeholder="Adgangskode (valgfrit)" value={password} onChange={e => setPassword(e.target.value)} className="flex-1" />
-                            </div>
+                            <Input type="text" placeholder="Custom alias (valgfrit)" value={customAlias} onChange={e => setCustomAlias(e.target.value)} />
+
                             <div className="flex flex-col gap-1">
                                 <label className="text-xs text-muted-foreground font-medium">
                                     Udløbsdato <span className="font-normal">(valgfrit)</span>
@@ -392,6 +391,23 @@ export default function Dashboard() {
                                     {expiresAt && <button type="button" onClick={() => setExpiresAt("")} className="text-xs text-muted-foreground hover:text-destructive">Ryd dato</button>}
                                 </div>
                             </div>
+
+                            {/* Adgangskodebeskyttelse — opt-in, default fra */}
+                            <div className="flex flex-col gap-2 rounded-lg border border-input p-3">
+                                <label className="flex items-center gap-2.5 text-sm text-foreground cursor-pointer select-none">
+                                    <input type="checkbox" checked={protect}
+                                        onChange={e => { setProtect(e.target.checked); if (!e.target.checked) setPassword("") }}
+                                        className="h-4 w-4 rounded border-input accent-primary cursor-pointer" />
+                                    <Lock className="w-3.5 h-3.5 text-muted-foreground" />
+                                    Beskyt med adgangskode
+                                    <span className="text-xs text-muted-foreground font-normal">(valgfrit)</span>
+                                </label>
+                                {protect && (
+                                    <Input type="password" placeholder="Vælg en adgangskode..." value={password}
+                                        onChange={e => setPassword(e.target.value)} className="w-full sm:w-64" autoFocus required />
+                                )}
+                            </div>
+
                             <Button type="submit" className="w-full">Opret link</Button>
                             {success && <p className="text-sm text-center text-primary font-medium">{success}</p>}
                         </form>
