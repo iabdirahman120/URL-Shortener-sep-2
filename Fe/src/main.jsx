@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import './index.css'
+import { opsaetSession } from './lib/session'
 import App from './App.jsx'
 
 // Dark mode init — før render for at undgå flash
@@ -11,6 +12,8 @@ if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dar
 } else {
     document.documentElement.classList.remove('dark')
 }
+
+opsaetSession()
 
 createRoot(document.getElementById('root')).render(
     <StrictMode>

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { Navbar } from '@/components/Navbar'
 import { Footer } from '@/components/Footer'
 import { useSEO } from '@/hooks/useSEO'
@@ -21,6 +21,9 @@ export default function Login() {
   const [fejl, setFejl] = useState('')
   const [henter, setHenter] = useState(false)
   const navigate = useNavigate()
+  const [sp] = useSearchParams()
+  // Sat af session.js, naar et kald er blevet afvist med 401.
+  const udloebet = sp.get('udloebet') === '1'
 
   useSEO('Log ind | shr.dk', 'Log ind på shr.dk for at se linkregistret.')
 
@@ -59,6 +62,12 @@ export default function Login() {
         <div className="max-w-[420px]">
           <p className="u-label">Adgang</p>
           <h1 className="u-section-heading mt-6">Log ind.</h1>
+
+          {udloebet && (
+            <p className="mt-6 rounded-[5px] border border-edge bg-surface px-4 py-3 text-[14.5px] leading-[1.5] text-ink-soft">
+              Din session er udløbet. Log ind igen for at fortsætte.
+            </p>
+          )}
 
           <form onSubmit={send} className="mt-12 flex flex-col gap-6">
             <div className="flex flex-col gap-2.5">
