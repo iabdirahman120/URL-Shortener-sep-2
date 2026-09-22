@@ -49,40 +49,63 @@ const VAERDI = [
 ]
 
 /**
- * De to planer.
+ * De tre planer.
  *
- * `spaerret: false` betyder, at funktionen endnu ikke er laast i backenden.
- * Den staar her, saa listen ikke lyver for den, der laeser koden, selv om
- * kunden ikke kan se forskel.
+ * Graenserne staar med tal og ikke med ord. "25 links om maaneden" kan man
+ * regne paa; "begraenset antal links" kan man ikke, og saa tror man ikke paa
+ * det.
+ *
+ * `mangler: true` markerer det, der endnu ikke er bygget. Det staar kun paa
+ * Business, som er saelgerstyret, saa kunden taler med et menneske foer der
+ * betales. Skal Business koebes selv, skal de to bygges foerst.
  */
 const PLANER = [
   {
     navn: 'Gratis',
-    pris: 0,
+    pris: '0',
+    enhed: 'kr. om måneden',
     linje: 'Til dig der skal have et par links ud at leve.',
     med: [
-      'Korte links med egen kode',
-      'Klik talt pr. link',
+      '25 links om måneden',
+      'Klik gemt i 30 dage',
       'QR-kode til hvert link',
-      'Udløbsdato og adgangskode',
+      'Tilfældig kode',
     ],
     knap: 'Kom i gang',
     til: '/login',
   },
   {
     navn: 'Pro',
-    pris: 49,
+    pris: '79',
+    enhed: 'kr. om måneden',
     linje: 'Til dig der kører kampagner og skal kunne se, hvad der virker.',
     med: [
-      'Alt i Gratis',
       'Ubegrænset antal links',
-      'Statistik på enhed og kilde',
+      'Klik gemt i 12 måneder',
+      'Vælg selv koden, fx shr.dk/okt26',
+      'Udløbsdato og adgangskode',
       'REST-API med egen nøgle',
       'Eksport til CSV',
-      'Svar inden for en arbejdsdag',
     ],
     knap: 'Vælg Pro',
     fremhaevet: true,
+  },
+  {
+    navn: 'Business',
+    pris: '249',
+    enhed: 'kr. om måneden',
+    linje: 'Til teamet, der deler links og skal have dem under eget navn.',
+    med: [
+      'Alt i Pro',
+      'Fem brugere på samme konto',
+      'Eget domæne, fx link.ditfirma.dk',
+      'Klik gemt i 3 år',
+      'Svar samme arbejdsdag',
+    ],
+    knap: 'Skriv til os',
+    // Saelgerstyret. Ingen betaling uden en samtale foerst, fordi to af
+    // funktionerne skal saettes op i haanden.
+    mail: 'mailto:kontakt@shr.dk?subject=Business-plan%20p%C3%A5%20shr.dk',
   },
 ]
 
@@ -91,7 +114,7 @@ const PLANER = [
 const SPOERGSMAAL = [
   {
     q: 'Hvad koster en URL-forkorter?',
-    a: 'shr.dk er gratis at bruge med egen kode, klikstatistik, QR-koder, udløbsdato og adgangskode på links. Pro koster 49 kr. om måneden og giver ubegrænset antal links, statistik på enhed og kilde, REST-API og eksport til CSV.',
+    a: 'shr.dk har tre planer. Gratis giver 25 links om måneden med klikstatistik og QR-koder. Pro koster 79 kr. om måneden og giver ubegrænset antal links, selvvalgte koder, udløbsdato, REST-API og klik gemt i 12 måneder. Business koster 249 kr. om måneden og giver fem brugere og eget domæne.',
   },
   {
     q: 'Holder et kort link for evigt?',
@@ -359,18 +382,18 @@ export default function Forside() {
       {/* ----------------------------------------------------------- priser */}
       <section id="priser" className="u-wrap u-gutter u-section-pad">
         <Band>
-          <h2 className="u-section-heading max-w-[16ch]">To planer, og ikke flere.</h2>
+          <h2 className="u-section-heading max-w-[16ch]">Betal for det, du bruger.</h2>
         </Band>
         <Band>
           <p className="u-lead u-measure mt-6">
-            Start gratis. Skift til Pro, når du har brug for flere links og vil kunne se,
-            hvor klikkene kommer fra.
+            Start gratis og betal først, når du har brug for mere. Alle planer har
+            klikstatistik og QR-koder med.
           </p>
         </Band>
 
-        {/* To planer side om side. Ingen midterste plan, der kun er der for at
-            faa den dyre til at se billig ud, og ingen "Mest populær"-pille. */}
-        <div className="mt-14 grid gap-6 md:grid-cols-2">
+        {/* Tre planer. Ingen "Mest populær"-pille; den midterste er fremhaevet
+            med en kant, hvilket siger det samme uden en etiket. */}
+        <div className="mt-14 grid gap-6 md:grid-cols-3">
           {PLANER.map((p) => (
             <Band key={p.navn}>
               <div
@@ -381,10 +404,10 @@ export default function Forside() {
                 <h3 className="text-[20px]">{p.navn}</h3>
 
                 <p className="mt-5 flex items-baseline gap-2">
-                  <span className="u-mono text-[42px] leading-none tracking-tight text-ink">
+                  <span className="u-mono text-[38px] leading-none tracking-tight text-ink">
                     {p.pris}
                   </span>
-                  <span className="text-[15px] text-ink-faint">kr. om måneden</span>
+                  <span className="text-[14px] text-ink-faint">{p.enhed}</span>
                 </p>
 
                 <p className="mt-5 text-[15.5px] leading-[1.55] text-ink-soft">{p.linje}</p>
@@ -401,11 +424,17 @@ export default function Forside() {
                 </ul>
 
                 <div className="mt-9">
-                  {p.til ? (
+                  {p.til && (
                     <Link to={p.til} className="u-btn-ghost w-full">
                       {p.knap}
                     </Link>
-                  ) : (
+                  )}
+                  {p.mail && (
+                    <a href={p.mail} className="u-btn-ghost w-full">
+                      {p.knap}
+                    </a>
+                  )}
+                  {!p.til && !p.mail && (
                     <button onClick={koebPro} disabled={koeber} className="u-btn w-full">
                       {koeber ? 'Henter betaling' : p.knap}
                     </button>
@@ -425,9 +454,10 @@ export default function Forside() {
         )}
 
         <Band>
-          <p className="mt-8 text-[14px] text-ink-faint">
-            Priser er uden moms. Du kan opsige Pro når som helst, og den løber til
-            udgangen af den betalte periode.
+          <p className="u-measure-wide mt-8 text-[14px] leading-[1.6] text-ink-faint">
+            Priser er uden moms. Du kan opsige når som helst, og planen løber til udgangen
+            af den betalte periode. Skifter du til en mindre plan, beholder du dine links,
+            men nye ud over grænsen kan ikke oprettes.
           </p>
         </Band>
       </section>
