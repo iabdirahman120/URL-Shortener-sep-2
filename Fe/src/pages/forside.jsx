@@ -120,9 +120,12 @@ const TRIN = [
 export default function Forside() {
   const navigate = useNavigate()
   const [url, setUrl] = useState('')
+  const [resultat, setResultat] = useState(null)
+  const [henter, setHenter] = useState(false)
+  const [fejl, setFejl] = useState('')
+  const [kopieret, setKopieret] = useState(false)
   const [koeber, setKoeber] = useState(false)
   const [koebFejl, setKoebFejl] = useState('')
-  const loggetInd = Boolean(localStorage.getItem('token'))
 
   /**
    * Start betalingen.
@@ -162,13 +165,38 @@ export default function Forside() {
     'Lav korte links med egen kode, udløbsdato og QR. Se antal klik, enhed og kilde for hvert link.'
   )
 
-  const start = (e) => {
+  /**
+   * Forkort med det samme.
+   *
+   * Ingen konto kraeves, og adressen maa gerne staa uden https. Serveren
+   * saetter det paa. Linket er aegte og virker permanent; det er dét, der
+   * goer det vaerd at oprette en konto for at kunne foelge det.
+   */
+  const start = async (e) => {
     e.preventDefault()
     const ren = url.trim()
     if (!ren) return
-    // Adressen foelger med over, saa man ikke skal indsaette den to gange.
-    sessionStorage.setItem('shr_url', ren)
-    navigate(loggetInd ? '/dashboard' : '/login')
+    setFejl('')
+    setHenter(true)
+    setResultat(null)
+    try {
+      const svar = await fetch('/api/public/shorten', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ originalUrl: ren }),
+      })
+      const data = await svar.json()
+      if (!svar.ok) {
+        setFejl(data.error || 'Linket kunne ikke laves. Prøv igen.')
+        return
+      }
+      setResultat(`${window.location.origin}/${data.short_code}`)
+      setUrl('')
+    } catch {
+      setFejl('Der er ingen forbindelse. Prøv igen om lidt.')
+    } finally {
+      setHenter(false)
+    }
   }
 
   return (
@@ -193,26 +221,81 @@ export default function Forside() {
             </p>
           </Band>
 
-          {/* Selve varen. Feltet staar hoejt, fordi det er dét, folk kom efter. */}
+          {/* Selve varen. Feltet staar hoejt, fordi det er dét, folk kom efter.
+              `type="text"` og ikke `type="url"`: browseren afviser ellers
+              "eksempel.dk", fordi der mangler https foran. Serveren saetter
+              det paa, saa kravet er kunstigt. */}
           <Band className="mt-11">
             <form onSubmit={start} className="flex flex-col gap-3 sm:flex-row">
               <input
-                type="url"
+                type="text"
+                inputMode="url"
+                autoComplete="off"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                placeholder="Indsæt din lange adresse her"
-                aria-label="Lang adresse"
+                placeholder="eksempel.dk/den/lange/adresse"
+                aria-label="Adresse der skal forkortes"
                 className="u-field h-[56px] flex-1 !text-[15.5px]"
               />
-              <button type="submit" className="u-btn h-[56px] shrink-0">
-                Forkort linket
+              <button type="submit" disabled={henter} className="u-btn h-[56px] shrink-0">
+                {henter ? 'Forkorter' : 'Forkort linket'}
               </button>
             </form>
-            <p className="mt-4 text-[14px] text-ink-faint">
-              {loggetInd
-                ? 'Du er logget ind. Adressen følger med over i registret.'
-                : 'Du skal have en konto. Adressen følger med, når du er logget ind.'}
-            </p>
+
+            {fejl && (
+              <p role="alert" className="mt-4 text-[14.5px] text-rust">
+                {fejl}
+              </p>
+            )}
+
+            {!resultat && !fejl && (
+              <p className="mt-4 text-[14px] text-ink-faint">
+                Du behøver ikke en konto, og du behøver ikke skrive https foran.
+              </p>
+            )}
+
+            {/* Resultatet. Linket foerst, tilbuddet bagefter. */}
+            {resultat && (
+              <div className="mt-6 rounded-[8px] border border-go bg-surface p-6 sm:p-7">
+                <p className="u-label">Her er dit link</p>
+
+                <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <a
+                    href={resultat}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="u-mono break-all text-[clamp(19px,2.6vw,28px)] leading-tight text-go"
+                  >
+                    {resultat.replace(/^https?:\/\//, '')}
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(resultat)
+                      setKopieret(true)
+                      setTimeout(() => setKopieret(false), 1800)
+                    }}
+                    className="u-btn shrink-0 !min-h-[46px]"
+                  >
+                    {kopieret ? 'Kopieret' : 'Kopiér'}
+                  </button>
+                </div>
+
+                <p className="mt-6 text-[15px] leading-[1.6] text-ink-soft">
+                  Linket virker nu og udløber ikke. Vil du se hvor mange der klikker, vælge din
+                  egen kode eller sætte en udløbsdato, skal du have en plan.
+                </p>
+
+                <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                  <a href="#priser" className="u-btn w-full sm:w-auto">
+                    Se planerne
+                  </a>
+                  <Link to="/login" className="u-btn-ghost w-full sm:w-auto">
+                    Log ind
+                  </Link>
+                </div>
+              </div>
+            )}
           </Band>
 
           {/* Det produktet goer, vist i stedet for beskrevet. */}
