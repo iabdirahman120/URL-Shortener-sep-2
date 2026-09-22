@@ -48,6 +48,69 @@ const VAERDI = [
   },
 ]
 
+/**
+ * De to planer.
+ *
+ * `spaerret: false` betyder, at funktionen endnu ikke er laast i backenden.
+ * Den staar her, saa listen ikke lyver for den, der laeser koden, selv om
+ * kunden ikke kan se forskel.
+ */
+const PLANER = [
+  {
+    navn: 'Gratis',
+    pris: 0,
+    linje: 'Til dig der skal have et par links ud at leve.',
+    med: [
+      'Korte links med egen kode',
+      'Klik talt pr. link',
+      'QR-kode til hvert link',
+      'Udløbsdato og adgangskode',
+    ],
+    knap: 'Kom i gang',
+    til: '/login',
+  },
+  {
+    navn: 'Pro',
+    pris: 49,
+    linje: 'Til dig der kører kampagner og skal kunne se, hvad der virker.',
+    med: [
+      'Alt i Gratis',
+      'Ubegrænset antal links',
+      'Statistik på enhed og kilde',
+      'REST-API med egen nøgle',
+      'Eksport til CSV',
+      'Svar inden for en arbejdsdag',
+    ],
+    knap: 'Vælg Pro',
+    fremhaevet: true,
+  },
+]
+
+/* Spoergsmaal folk faktisk stiller. Staar som FAQPage i den strukturerede
+   data, saa svarene kan citeres direkte i Google og i AI-soegninger. */
+const SPOERGSMAAL = [
+  {
+    q: 'Hvad koster en URL-forkorter?',
+    a: 'shr.dk er gratis at bruge med egen kode, klikstatistik, QR-koder, udløbsdato og adgangskode på links. Pro koster 49 kr. om måneden og giver ubegrænset antal links, statistik på enhed og kilde, REST-API og eksport til CSV.',
+  },
+  {
+    q: 'Holder et kort link for evigt?',
+    a: 'Ja, medmindre du selv sætter en udløbsdato. Standarden er, at linket aldrig udløber. Sætter du en dato, svarer linket bagefter, at det er udløbet, i stedet for at føre til en side, der ikke findes.',
+  },
+  {
+    q: 'Kan jeg vælge, hvad der står efter shr.dk/?',
+    a: 'Ja. Du kan skrive din egen kode, for eksempel shr.dk/okt26, hvis den ikke allerede er taget. Lader du feltet stå tomt, finder systemet en ledig kode selv.',
+  },
+  {
+    q: 'Kan jeg se, hvem der klikker?',
+    a: 'Du kan se hvor mange, hvornår, fra hvilken slags enhed og hvor de kom fra. Du kan ikke se, hvem den enkelte person er, og der sættes ingen cookies hos den besøgende.',
+  },
+  {
+    q: 'Kan jeg beskytte et link med en adgangskode?',
+    a: 'Ja. Slå adgangskode til, når du opretter linket. Besøgende skal skrive koden, før de sendes videre. Koden gemmes hashet og kan ikke læses af nogen, heller ikke af os.',
+  },
+]
+
 const TRIN = [
   ['Indsæt adressen', 'Kopiér den lange URL ind i feltet. Der er ingen grænse for, hvor lang den må være.'],
   ['Vælg koden', 'Tag den, systemet foreslår, eller skriv din egen. Sæt en udløbsdato på, hvis linket kun skal gælde en periode.'],
@@ -57,7 +120,42 @@ const TRIN = [
 export default function Forside() {
   const navigate = useNavigate()
   const [url, setUrl] = useState('')
+  const [koeber, setKoeber] = useState(false)
+  const [koebFejl, setKoebFejl] = useState('')
   const loggetInd = Boolean(localStorage.getItem('token'))
+
+  /**
+   * Start betalingen.
+   *
+   * Betaling kraever en konto, saa er man ikke logget ind, sendes man derhen
+   * foerst. Fejler kaldet, staar der hvad man goer i stedet for en raa
+   * serverfejl: Stripe er maaske slet ikke sat op endnu.
+   */
+  const koebPro = async () => {
+    const token = localStorage.getItem('token')
+    if (!token) {
+      navigate('/login')
+      return
+    }
+    setKoebFejl('')
+    setKoeber(true)
+    try {
+      const svar = await fetch('/api/subscription/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      })
+      const data = await svar.json()
+      if (data.url) {
+        window.location.href = data.url
+        return
+      }
+      setKoebFejl('Betalingen kunne ikke startes lige nu. Skriv til os, så sætter vi Pro op manuelt.')
+    } catch {
+      setKoebFejl('Der er ingen forbindelse. Prøv igen om lidt.')
+    } finally {
+      setKoeber(false)
+    }
+  }
 
   useSEO(
     'shr.dk, forkort lange links og se hvem der klikker',
@@ -172,6 +270,104 @@ export default function Forside() {
               </Band>
             ))}
           </ol>
+        </div>
+      </section>
+
+      {/* ----------------------------------------------------------- priser */}
+      <section id="priser" className="u-wrap u-gutter u-section-pad">
+        <Band>
+          <h2 className="u-section-heading max-w-[16ch]">To planer, og ikke flere.</h2>
+        </Band>
+        <Band>
+          <p className="u-lead u-measure mt-6">
+            Start gratis. Skift til Pro, når du har brug for flere links og vil kunne se,
+            hvor klikkene kommer fra.
+          </p>
+        </Band>
+
+        {/* To planer side om side. Ingen midterste plan, der kun er der for at
+            faa den dyre til at se billig ud, og ingen "Mest populær"-pille. */}
+        <div className="mt-14 grid gap-6 md:grid-cols-2">
+          {PLANER.map((p) => (
+            <Band key={p.navn}>
+              <div
+                className={`flex h-full flex-col rounded-[8px] bg-surface p-8 sm:p-9 ${
+                  p.fremhaevet ? 'border-2 border-go' : 'border border-edge'
+                }`}
+              >
+                <h3 className="text-[20px]">{p.navn}</h3>
+
+                <p className="mt-5 flex items-baseline gap-2">
+                  <span className="u-mono text-[42px] leading-none tracking-tight text-ink">
+                    {p.pris}
+                  </span>
+                  <span className="text-[15px] text-ink-faint">kr. om måneden</span>
+                </p>
+
+                <p className="mt-5 text-[15.5px] leading-[1.55] text-ink-soft">{p.linje}</p>
+
+                <ul className="mt-8 flex flex-1 flex-col gap-3">
+                  {p.med.map((m) => (
+                    <li key={m} className="flex gap-3 text-[15.5px] text-ink-soft">
+                      {/* Groen prik frem for et flueben-ikon. Ikonet er det
+                          samme i hver anden skabelon. */}
+                      <span aria-hidden="true" className="mt-[9px] h-[5px] w-[5px] shrink-0 rounded-full bg-go" />
+                      {m}
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="mt-9">
+                  {p.til ? (
+                    <Link to={p.til} className="u-btn-ghost w-full">
+                      {p.knap}
+                    </Link>
+                  ) : (
+                    <button onClick={koebPro} disabled={koeber} className="u-btn w-full">
+                      {koeber ? 'Henter betaling' : p.knap}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </Band>
+          ))}
+        </div>
+
+        {koebFejl && (
+          <Band>
+            <p role="alert" className="mt-6 text-[14.5px] text-rust">
+              {koebFejl}
+            </p>
+          </Band>
+        )}
+
+        <Band>
+          <p className="mt-8 text-[14px] text-ink-faint">
+            Priser er uden moms. Du kan opsige Pro når som helst, og den løber til
+            udgangen af den betalte periode.
+          </p>
+        </Band>
+      </section>
+
+      {/* ------------------------------------------------------ spørgsmål */}
+      <section className="bg-sunk">
+        <div className="u-wrap u-gutter u-section-pad">
+          <Band>
+            <h2 className="u-section-heading max-w-[18ch]">Det folk spørger om.</h2>
+          </Band>
+
+          <dl className="mt-12 flex flex-col">
+            {SPOERGSMAAL.map((f, i) => (
+              <Band key={f.q}>
+                <div className={`grid gap-x-12 gap-y-3 py-8 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] ${
+                  i > 0 ? 'border-t border-edge' : ''
+                }`}>
+                  <dt className="text-[18px] font-medium leading-[1.3]">{f.q}</dt>
+                  <dd className="text-[15.5px] leading-[1.6] text-ink-soft">{f.a}</dd>
+                </div>
+              </Band>
+            ))}
+          </dl>
         </div>
       </section>
 

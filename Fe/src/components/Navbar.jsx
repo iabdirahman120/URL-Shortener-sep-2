@@ -36,7 +36,7 @@ export function Navbar() {
         ['API', '/docs'],
         ['Profil', '/settings'],
       ]
-    : [['API', '/docs']]
+    : [['Priser', '/#priser'], ['API', '/docs']]
 
   return (
     <header className="sticky top-0 z-50 border-b border-edge bg-paper/85 backdrop-blur-sm">

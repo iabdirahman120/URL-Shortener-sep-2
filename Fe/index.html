@@ -31,16 +31,107 @@
 
     <!-- Struktureret data (WebApplication) -->
     <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
     {
-      "@context": "https://schema.org",
       "@type": "WebApplication",
+      "@id": "https://shr.dk/#app",
       "name": "shr.dk",
       "url": "https://shr.dk/",
-      "applicationCategory": "UtilitiesApplication",
+      "applicationCategory": "BusinessApplication",
+      "applicationSubCategory": "URL-forkorter",
       "operatingSystem": "Web",
-      "description": "Gratis dansk URL-forkorter med klik-statistik, QR-koder, password-beskyttede links og REST API.",
-      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "DKK" }
+      "inLanguage": "da-DK",
+      "description": "Dansk URL-forkorter. Lav korte links med egen kode, udløbsdato, adgangskode og QR. Se antal klik, enhed og kilde for hvert link.",
+      "featureList": [
+        "Korte links med selvvalgt kode",
+        "Klikstatistik pr. link",
+        "QR-kode til hvert link",
+        "Udløbsdato på links",
+        "Adgangskode på links",
+        "REST-API"
+      ],
+      "offers": [
+        {
+          "@type": "Offer",
+          "name": "Gratis",
+          "price": "0",
+          "priceCurrency": "DKK",
+          "url": "https://shr.dk/#priser"
+        },
+        {
+          "@type": "Offer",
+          "name": "Pro",
+          "price": "49",
+          "priceCurrency": "DKK",
+          "url": "https://shr.dk/#priser",
+          "priceSpecification": {
+            "@type": "UnitPriceSpecification",
+            "price": "49",
+            "priceCurrency": "DKK",
+            "billingDuration": 1,
+            "billingIncrement": 1,
+            "unitCode": "MON"
+          }
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://shr.dk/#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Hvad koster en URL-forkorter?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "shr.dk er gratis at bruge med egen kode, klikstatistik, QR-koder, udløbsdato og adgangskode på links. Pro koster 49 kr. om måneden og giver ubegrænset antal links, statistik på enhed og kilde, REST-API og eksport til CSV."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Holder et kort link for evigt?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Et kort link fra shr.dk holder, medmindre du selv sætter en udløbsdato. Standarden er, at linket aldrig udløber. Sætter du en dato, svarer linket bagefter, at det er udløbet, i stedet for at føre til en side, der ikke findes."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Kan jeg vælge, hvad der står efter shr.dk/?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja. Du kan skrive din egen kode, for eksempel shr.dk/okt26, hvis den ikke allerede er taget. Lader du feltet stå tomt, finder systemet en ledig kode selv."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Kan jeg se, hvem der klikker?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Du kan se hvor mange der klikker, hvornår, fra hvilken slags enhed og hvor de kom fra. Du kan ikke se, hvem den enkelte person er, og shr.dk sætter ingen cookies hos den besøgende."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Kan jeg beskytte et link med en adgangskode?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja. Slå adgangskode til, når du opretter linket på shr.dk. Besøgende skal skrive koden, før de sendes videre. Koden gemmes hashet og kan ikke læses af nogen."
+          }
+        }
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://shr.dk/#site",
+      "url": "https://shr.dk/",
+      "name": "shr.dk",
+      "inLanguage": "da-DK"
     }
+  ]
+}
     </script>
   </head>
   <body>
