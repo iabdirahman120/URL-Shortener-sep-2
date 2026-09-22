@@ -1,92 +1,123 @@
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Navbar } from "@/components/Navbar"
-import { Footer } from "@/components/Footer"
-import { useState } from "react"
-import { useNavigate, Link } from "react-router-dom"
+import { useState } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
+import { Navbar } from '@/components/Navbar'
+import { Footer } from '@/components/Footer'
+import { useSEO } from '@/hooks/useSEO'
 
+/**
+ * Login.
+ *
+ * Venstrestillet i stedet for et centreret kort. Et kort midt paa en tom
+ * skaerm er den mest generiske loesning der findes, og siden har i forvejen
+ * ét udtryk, der ikke bygger paa kasser.
+ *
+ * Feltet husker ikke, om du har en konto: selvregistrering er lukket, saa
+ * teksten nedenunder siger det rent ud i stedet for at linke til en
+ * tilmeldingsside, der svarer 403.
+ */
 export default function Login() {
-    const [email, setEmail] = useState("")
-    const [password, setPassword] = useState("")
-    const [error, setError] = useState("")
-    const [loading, setLoading] = useState(false)
-    const navigate = useNavigate()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [fejl, setFejl] = useState('')
+  const [henter, setHenter] = useState(false)
+  const navigate = useNavigate()
 
-    const handleSubmit = async (e) => {
-        e.preventDefault()
-        setError("")
-        setLoading(true)
+  useSEO('Log ind | shr.dk', 'Log ind på shr.dk for at se linkregistret.')
 
-        const response = await fetch('/api/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
-        })
-
-        const data = await response.json()
-        setLoading(false)
-
-        if (data.token) {
-            localStorage.setItem('token', data.token)
-            localStorage.setItem('is_admin', data.is_admin ? 'true' : 'false')
-            navigate('/dashboard')
-        } else {
-            setError(data.message || 'Forkert email eller adgangskode.')
-        }
+  const send = async (e) => {
+    e.preventDefault()
+    setFejl('')
+    setHenter(true)
+    try {
+      const svar = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+      const data = await svar.json()
+      if (data.token) {
+        localStorage.setItem('token', data.token)
+        localStorage.setItem('is_admin', data.is_admin ? 'true' : 'false')
+        navigate('/dashboard')
+      } else {
+        setFejl(data.message || 'Forkert email eller adgangskode.')
+      }
+    } catch {
+      // En netvaerksfejl og en forkert adgangskode er ikke det samme, og
+      // beskeden skal sige hvad man goer ved det.
+      setFejl('Kunne ikke få forbindelse. Prøv igen om lidt.')
+    } finally {
+      setHenter(false)
     }
+  }
 
-    return (
-        <div className="min-h-screen flex flex-col bg-background">
-            <Navbar />
-            <div className="flex-1 flex items-center justify-center px-6 py-12">
-                <Card className="w-full max-w-sm">
-                    <CardHeader className="text-center">
-                        <CardTitle className="text-2xl">Velkommen tilbage</CardTitle>
-                        <CardDescription>Log ind på din konto</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <form className="space-y-4" onSubmit={handleSubmit}>
-                            <div className="space-y-1.5">
-                                <Label htmlFor="email">Email</Label>
-                                <Input
-                                    type="email"
-                                    id="email"
-                                    placeholder="din@email.dk"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                />
-                            </div>
-                            <div className="space-y-1.5">
-                                <div className="flex items-center justify-between">
-                                    <Label htmlFor="password">Adgangskode</Label>
-                                    <Link to="/forgot-password" className="text-xs text-primary hover:underline">
-                                        Glemt adgangskode?
-                                    </Link>
-                                </div>
-                                <Input
-                                    type="password"
-                                    id="password"
-                                    placeholder="••••••••"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                />
-                            </div>
-                            {error && <p className="text-sm text-destructive">{error}</p>}
-                            <Button type="submit" className="w-full" disabled={loading}>
-                                {loading ? 'Logger ind...' : 'Log ind'}
-                            </Button>
-                        </form>
-                        <p className="text-sm text-center text-muted-foreground mt-5">
-                            Ingen konto? Kontakt en administrator for at få adgang.
-                        </p>
-                    </CardContent>
-                </Card>
+  return (
+    <div className="flex min-h-screen flex-col bg-paper">
+      <Navbar />
+
+      <main className="u-wrap u-gutter flex-1 py-[clamp(56px,9vw,120px)]">
+        <div className="max-w-[420px]">
+          <p className="u-label">Adgang</p>
+          <h1 className="u-section-heading mt-6">Log ind.</h1>
+
+          <form onSubmit={send} className="mt-12 flex flex-col gap-6">
+            <div className="flex flex-col gap-2.5">
+              <label htmlFor="email" className="u-label">
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                required
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="din@email.dk"
+                className="u-field"
+              />
             </div>
-            <Footer />
+
+            <div className="flex flex-col gap-2.5">
+              <div className="flex items-baseline justify-between gap-4">
+                <label htmlFor="kode" className="u-label">
+                  Adgangskode
+                </label>
+                <Link to="/forgot-password" className="u-link text-[13.5px]">
+                  Glemt den?
+                </Link>
+              </div>
+              <input
+                id="kode"
+                type="password"
+                required
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="u-field"
+              />
+            </div>
+
+            {/* Fejlen staar over knappen, ikke under. Ellers laeser man den
+                foerst efter at have trykket igen. */}
+            {fejl && (
+              <p role="alert" className="text-[14.5px] leading-[1.5] text-rust">
+                {fejl}
+              </p>
+            )}
+
+            <button type="submit" disabled={henter} className="u-btn mt-2 w-full">
+              {henter ? 'Logger ind' : 'Log ind'}
+            </button>
+          </form>
+
+          <p className="mt-10 text-[14.5px] leading-[1.6] text-ink-faint">
+            Der er ingen selvbetjent oprettelse. Skal du have adgang, beder du en
+            administrator om en konto.
+          </p>
         </div>
-    )
+      </main>
+
+      <Footer />
+    </div>
+  )
 }

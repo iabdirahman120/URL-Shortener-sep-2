@@ -1,318 +1,241 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Navbar } from '@/components/Navbar'
+import { Footer } from '@/components/Footer'
 import { useSEO } from '@/hooks/useSEO'
-import {
-    Link2, BarChart2, Zap, Globe, Code2, QrCode,
-    Clock, ChevronRight, Play, Check, Lock
-} from 'lucide-react'
+import { useBand } from '@/hooks/useBand'
 
-const features = [
-    {
-        icon: <Link2 className="w-6 h-6 text-primary" />,
-        title: 'Korte links',
-        desc: 'Forkort lange URL\'er til præcise, delevenlige links på sekunder.',
-    },
-    {
-        icon: <BarChart2 className="w-6 h-6 text-primary" />,
-        title: 'Klik-statistik',
-        desc: 'Se præcis hvor mange der klikker på dine links i realtid.',
-    },
-    {
-        icon: <QrCode className="w-6 h-6 text-primary" />,
-        title: 'QR-koder',
-        desc: 'Generer automatisk en QR-kode til hvert link — klar til print.',
-    },
-    {
-        icon: <Globe className="w-6 h-6 text-primary" />,
-        title: 'Custom domain',
-        desc: 'Brug dit eget domæne til dine links. Styrk dit brand.',
-        pro: true,
-    },
-    {
-        icon: <Code2 className="w-6 h-6 text-primary" />,
-        title: 'API-adgang',
-        desc: 'Integrer link-forkortning direkte i dit eget CMS eller system.',
-        pro: true,
-    },
-    {
-        icon: <Clock className="w-6 h-6 text-primary" />,
-        title: 'Udløbsdato',
-        desc: 'Sæt en udløbsdato på dine links — perfekt til tidsbegrænsede kampagner.',
-    },
+/**
+ * Forsiden.
+ *
+ * Den skal svare paa ét spoergsmaal inden for to sekunder: hvad er det her.
+ * Derfor staar ordene "forkort" og "link" i overskriften, og feltet, man
+ * faktisk skal bruge, staar lige under. Ingen pille over overskriften, ingen
+ * opfundne brugertal.
+ *
+ * Feltet virker. Skriver man en adresse og trykker, bliver den husket og man
+ * sendes videre: til registret hvis man er logget ind, ellers til login og
+ * derfra direkte til registret med adressen klar. Et felt, der ikke goer
+ * noget, er en attrap, og det kan folk se.
+ */
+
+function Band({ children, className = '' }) {
+  const ref = useBand()
+  return (
+    <div ref={ref} className={`u-band ${className}`}>
+      {children}
+    </div>
+  )
+}
+
+/* Kun det systemet faktisk kan. Intet er "paa vej" eller "kommer snart". */
+const VAERDI = [
+  {
+    navn: 'Korte links, der kan læses op',
+    tekst: 'Vælg koden selv, eller lad systemet finde en ledig. shr.dk/okt26 kan skrives af fra en plakat. Den lange kan ikke.',
+  },
+  {
+    navn: 'Du kan se, om nogen klikker',
+    tekst: 'Hvert klik tælles med tidspunkt, enhed og hvor besøgende kom fra. Uden at du skal sætte noget op.',
+  },
+  {
+    navn: 'QR-kode til hvert link',
+    tekst: 'Genereres af sig selv og kan sættes direkte i tryksager. Den peger på det korte link, så du også kan måle den.',
+  },
+  {
+    navn: 'Links, der lukker sig selv',
+    tekst: 'Sæt en udløbsdato på en kampagne. Bagefter svarer linket, at tilbuddet er slut, i stedet for at føre til en død side.',
+  },
 ]
 
-const steps = [
-    { num: '01', title: 'Indsæt din URL', desc: 'Kopiér og indsæt den lange URL du vil forkorte.' },
-    { num: '02', title: 'Tilpas dit link', desc: 'Vælg et custom alias og sæt evt. en udløbsdato.' },
-    { num: '03', title: 'Del og spor', desc: 'Del linket og følg med i klik-statistikken.' },
-]
-
-const freeFeatures = [
-    'Op til 50 links',
-    'Klik-statistik',
-    'QR-koder',
-    'Custom alias',
-    'Udløbsdato',
-]
-
-const proFeatures = [
-    'Ubegrænsede links',
-    'Klik-statistik',
-    'QR-koder',
-    'Custom alias',
-    'Udløbsdato',
-    'Custom domain',
-    'API-adgang',
-    'Prioriteret support',
-    'Eksporter data',
+const TRIN = [
+  ['Indsæt adressen', 'Kopiér den lange URL ind i feltet. Der er ingen grænse for, hvor lang den må være.'],
+  ['Vælg koden', 'Tag den, systemet foreslår, eller skriv din egen. Sæt en udløbsdato på, hvis linket kun skal gælde en periode.'],
+  ['Del det, og følg med', 'Linket virker med det samme. Klikkene begynder at tælle fra første besøg.'],
 ]
 
 export default function Forside() {
-    useSEO(
-        'shr.dk — Gratis URL-forkorter med statistik, QR-koder og API',
-        'Forkort dine links gratis med shr.dk. Følg klik-statistik, lav QR-koder, opret password-beskyttede links og brug vores REST API. Hurtigt, dansk og gratis.'
-    )
-    const [url, setUrl] = useState('')
-    const navigate = useNavigate()
-    const token = localStorage.getItem('token')
+  const navigate = useNavigate()
+  const [url, setUrl] = useState('')
+  const loggetInd = Boolean(localStorage.getItem('token'))
 
-    const handleShorten = (e) => {
-        e.preventDefault()
-        if (!url) return
-        if (token) {
-            navigate('/dashboard', { state: { prefillUrl: url } })
-        } else {
-            navigate('/register')
-        }
-    }
+  useSEO(
+    'shr.dk, forkort lange links og se hvem der klikker',
+    'Lav korte links med egen kode, udløbsdato og QR. Se antal klik, enhed og kilde for hvert link.'
+  )
 
-    return (
-        <div className="min-h-screen flex flex-col">
-            <Navbar />
+  const start = (e) => {
+    e.preventDefault()
+    const ren = url.trim()
+    if (!ren) return
+    // Adressen foelger med over, saa man ikke skal indsaette den to gange.
+    sessionStorage.setItem('shr_url', ren)
+    navigate(loggetInd ? '/dashboard' : '/login')
+  }
 
-            {/* Hero */}
-            <section className="flex flex-col items-center justify-center text-center px-6 pt-24 pb-20 bg-gradient-to-b from-primary/5 to-background">
-                <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-xs font-medium px-3 py-1.5 rounded-full mb-6">
-                    <Zap className="w-3.5 h-3.5" />
-                    Hurtig, gratis og nem at bruge
-                </div>
-                <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-foreground mb-5 max-w-3xl leading-tight">
-                    Forkort dine links.<br />
-                    <span className="text-primary">Spor hvert klik.</span>
-                </h1>
-                <p className="text-lg text-muted-foreground max-w-xl mb-10">
-                    Verdens hurtigste link-forkorter. Opret korte links med QR-koder, klik-statistik og custom domæner.
-                </p>
-                <form onSubmit={handleShorten} className="flex gap-2 w-full max-w-lg">
-                    <Input
-                        type="url"
-                        placeholder="Indsæt din lange URL her..."
-                        value={url}
-                        onChange={(e) => setUrl(e.target.value)}
-                        className="h-11 text-base"
-                    />
-                    <Button type="submit" size="lg" className="shrink-0">
-                        Forkort nu <ChevronRight className="w-4 h-4 ml-1" />
-                    </Button>
-                </form>
-                <p className="text-xs text-muted-foreground mt-3">
-                    Gratis at komme i gang — ingen kreditkort påkrævet
-                </p>
-            </section>
+  return (
+    <div className="min-h-screen bg-paper">
+      <Navbar />
 
-            {/* Stats */}
-            <section className="border-y bg-muted/30 py-8 px-6">
-                <div className="max-w-4xl mx-auto grid grid-cols-3 gap-6 text-center">
-                    <div>
-                        <p className="text-3xl font-bold text-foreground">10.000+</p>
-                        <p className="text-sm text-muted-foreground mt-1">Links forkortet</p>
-                    </div>
-                    <div>
-                        <p className="text-3xl font-bold text-foreground">500+</p>
-                        <p className="text-sm text-muted-foreground mt-1">Aktive brugere</p>
-                    </div>
-                    <div>
-                        <p className="text-3xl font-bold text-foreground">50.000+</p>
-                        <p className="text-sm text-muted-foreground mt-1">Klik sporet</p>
-                    </div>
-                </div>
-            </section>
+      {/* ---------------------------------------------------------- hero */}
+      <section className="u-wrap u-gutter pt-[clamp(48px,7vw,96px)] pb-[clamp(56px,8vw,108px)]">
+        <div className="max-w-[820px]">
+          <Band>
+            <h1 className="u-display">
+              Forkort lange links.
+              <br />
+              <span className="text-go">Se, hvem der klikker.</span>
+            </h1>
+          </Band>
 
-            {/* Features */}
-            <section id="funktioner" className="py-20 px-6">
-                <div className="max-w-5xl mx-auto">
-                    <div className="text-center mb-14">
-                        <h2 className="text-3xl font-bold text-foreground mb-3">Alt hvad du behøver</h2>
-                        <p className="text-muted-foreground max-w-md mx-auto">
-                            Fra simple korte links til avanceret tracking og API-integration — vi har det hele.
-                        </p>
-                    </div>
-                    <div className="grid md:grid-cols-3 gap-6">
-                        {features.map((f) => (
-                            <div key={f.title} className="border rounded-xl p-6 bg-card hover:shadow-md transition-shadow relative">
-                                {f.pro && (
-                                    <span className="absolute top-4 right-4 text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded-full font-medium">Pro</span>
-                                )}
-                                <div className="mb-4">{f.icon}</div>
-                                <h3 className="font-semibold text-foreground mb-2">{f.title}</h3>
-                                <p className="text-sm text-muted-foreground">{f.desc}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
+          <Band>
+            <p className="u-lead u-measure mt-8">
+              shr.dk laver en uoverskuelig adresse om til en kort kode, du kan sætte i en mail,
+              på en plakat eller i en annonce. Og tæller bagefter, hvor mange der brugte den.
+            </p>
+          </Band>
 
-            {/* How it works */}
-            <section className="py-20 px-6 bg-muted/30 border-y">
-                <div className="max-w-4xl mx-auto">
-                    <div className="text-center mb-14">
-                        <h2 className="text-3xl font-bold text-foreground mb-3">Sådan fungerer det</h2>
-                        <p className="text-muted-foreground">3 trin — og du er i gang på under 30 sekunder.</p>
-                    </div>
-                    <div className="grid md:grid-cols-3 gap-8">
-                        {steps.map((s) => (
-                            <div key={s.num} className="text-center">
-                                <div className="w-12 h-12 rounded-full bg-primary/10 text-primary font-bold text-sm flex items-center justify-center mx-auto mb-4">
-                                    {s.num}
-                                </div>
-                                <h3 className="font-semibold text-foreground mb-2">{s.title}</h3>
-                                <p className="text-sm text-muted-foreground">{s.desc}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
+          {/* Selve varen. Feltet staar hoejt, fordi det er dét, folk kom efter. */}
+          <Band className="mt-11">
+            <form onSubmit={start} className="flex flex-col gap-3 sm:flex-row">
+              <input
+                type="url"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                placeholder="Indsæt din lange adresse her"
+                aria-label="Lang adresse"
+                className="u-field h-[56px] flex-1 !text-[15.5px]"
+              />
+              <button type="submit" className="u-btn h-[56px] shrink-0">
+                Forkort linket
+              </button>
+            </form>
+            <p className="mt-4 text-[14px] text-ink-faint">
+              {loggetInd
+                ? 'Du er logget ind. Adressen følger med over i registret.'
+                : 'Du skal have en konto. Adressen følger med, når du er logget ind.'}
+            </p>
+          </Band>
 
-            {/* Video sektion */}
-            <section className="py-20 px-6">
-                <div className="max-w-3xl mx-auto text-center">
-                    <h2 className="text-3xl font-bold text-foreground mb-3">Se det i aktion</h2>
-                    <p className="text-muted-foreground mb-8">En hurtig video der viser alle funktioner — eksklusivt for Pro-brugere.</p>
-                    <div className="relative rounded-2xl overflow-hidden border bg-muted aspect-video flex items-center justify-center">
-                        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-background/80" />
-                        <div className="relative flex flex-col items-center gap-3">
-                            <div className="w-16 h-16 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center">
-                                <Play className="w-7 h-7 text-primary ml-1" />
-                            </div>
-                            <div className="flex items-center gap-2 bg-background/80 backdrop-blur text-sm font-medium px-4 py-2 rounded-full border">
-                                <Lock className="w-3.5 h-3.5 text-primary" />
-                                Kræver Pro-abonnement
-                            </div>
-                        </div>
-                    </div>
-                    <Link to="/register">
-                        <Button className="mt-6">Opgrader til Pro <ChevronRight className="w-4 h-4 ml-1" /></Button>
-                    </Link>
-                </div>
-            </section>
+          {/* Det produktet goer, vist i stedet for beskrevet. */}
+          <Band className="mt-14">
+            <div className="rounded-[7px] border border-edge bg-surface p-6 sm:p-8">
+              <p className="u-label">Før</p>
+              <p className="u-mono mt-3 break-all text-[13px] leading-[1.7] text-ink-faint sm:text-[14px]">
+                https://www.eksempel.dk/kampagne/efteraar-2026/tilmelding?utm_source=nyhedsbrev&amp;utm_medium=email&amp;utm_campaign=okt
+              </p>
 
-            {/* Priser */}
-            <section id="priser" className="py-20 px-6 bg-muted/30 border-y">
-                <div className="max-w-4xl mx-auto">
-                    <div className="text-center mb-14">
-                        <h2 className="text-3xl font-bold text-foreground mb-3">Simpel prissætning</h2>
-                        <p className="text-muted-foreground">Start gratis — opgrader når du er klar.</p>
-                    </div>
-                    <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
-                        {/* Free */}
-                        <div className="border rounded-2xl p-8 bg-card">
-                            <h3 className="text-lg font-bold text-foreground mb-1">Gratis</h3>
-                            <p className="text-3xl font-bold text-foreground mt-3 mb-1">0 kr<span className="text-base font-normal text-muted-foreground">/md</span></p>
-                            <p className="text-sm text-muted-foreground mb-6">Perfekt til at komme i gang.</p>
-                            <ul className="space-y-3 mb-8">
-                                {freeFeatures.map(f => (
-                                    <li key={f} className="flex items-center gap-2 text-sm">
-                                        <Check className="w-4 h-4 text-primary shrink-0" />
-                                        {f}
-                                    </li>
-                                ))}
-                            </ul>
-                            <Link to="/register" className="block">
-                                <Button variant="outline" className="w-full">Kom i gang gratis</Button>
-                            </Link>
-                        </div>
-                        {/* Pro */}
-                        <div className="border-2 border-primary rounded-2xl p-8 bg-card relative">
-                            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full">
-                                Populær
-                            </div>
-                            <h3 className="text-lg font-bold text-foreground mb-1">Pro</h3>
-                            <p className="text-3xl font-bold text-foreground mt-3 mb-1">49 kr<span className="text-base font-normal text-muted-foreground">/md</span></p>
-                            <p className="text-sm text-muted-foreground mb-6">Til dig der vil have det hele.</p>
-                            <ul className="space-y-3 mb-8">
-                                {proFeatures.map(f => (
-                                    <li key={f} className="flex items-center gap-2 text-sm">
-                                        <Check className="w-4 h-4 text-primary shrink-0" />
-                                        {f}
-                                    </li>
-                                ))}
-                            </ul>
-                            <Link to="/register" className="block">
-                                <Button className="w-full">Start Pro-periode</Button>
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* API sektion */}
-            <section id="api" className="py-20 px-6">
-                <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-12 items-center">
-                    <div>
-                        <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-xs font-medium px-3 py-1.5 rounded-full mb-4">
-                            <Code2 className="w-3.5 h-3.5" />
-                            Developer API
-                        </div>
-                        <h2 className="text-3xl font-bold text-foreground mb-4">Integrer med dit eget system</h2>
-                        <p className="text-muted-foreground mb-6">
-                            Brug vores REST API til at forkorte links direkte fra dit CMS, e-mail system eller custom applikation. Nøglen genereres automatisk på din profil.
-                        </p>
-                        <Link to="/register">
-                            <Button>Hent din API-nøgle <ChevronRight className="w-4 h-4 ml-1" /></Button>
-                        </Link>
-                    </div>
-                    <div className="bg-foreground rounded-xl p-5 text-sm font-mono">
-                        <p className="text-muted-foreground mb-2"># Forkort et link via API</p>
-                        <p className="text-green-400">curl -X POST https://shr.dk/api/urls/shorten \</p>
-                        <p className="text-green-400 ml-4">-H "Authorization: Bearer DIN_API_NØGLE" \</p>
-                        <p className="text-green-400 ml-4">-d {'\'{"originalUrl":"https://..."}\''}</p>
-                        <p className="text-muted-foreground mt-3 mb-1"># Svar</p>
-                        <p className="text-blue-300">{'{'}</p>
-                        <p className="text-blue-300 ml-4">"short_code": "abc123",</p>
-                        <p className="text-blue-300 ml-4">"short_url": "https://shr.dk/r/abc123"</p>
-                        <p className="text-blue-300">{'}'}</p>
-                    </div>
-                </div>
-            </section>
-
-            {/* CTA */}
-            <section className="py-20 px-6 bg-primary text-primary-foreground text-center">
-                <h2 className="text-3xl font-bold mb-3">Klar til at komme i gang?</h2>
-                <p className="text-primary-foreground/80 mb-8 max-w-sm mx-auto">
-                    Opret en gratis konto og forkort dit første link på under et minut.
-                </p>
-                <Link to="/register">
-                    <Button variant="secondary" size="lg">
-                        Opret gratis konto <ChevronRight className="w-4 h-4 ml-1" />
-                    </Button>
-                </Link>
-            </section>
-
-            {/* Footer */}
-            <footer className="border-t py-8 px-6 text-center text-sm text-muted-foreground">
-                <div className="flex items-center justify-center gap-2 font-bold text-foreground mb-3">
-                    <Link2 className="w-4 h-4 text-primary" />
-                    shr.dk
-                </div>
-                <p>© {new Date().getFullYear()} shr.dk — Alle rettigheder forbeholdes</p>
-                <div className="flex justify-center gap-4 mt-3">
-                    <Link to="/login" className="hover:text-foreground transition-colors">Log ind</Link>
-                    <Link to="/register" className="hover:text-foreground transition-colors">Opret konto</Link>
-                </div>
-            </footer>
+              <p className="u-label mt-8">Efter</p>
+              <p className="u-mono mt-3 text-[clamp(24px,4.4vw,40px)] leading-none tracking-tight text-ink">
+                shr.dk/<span className="text-go">okt26</span>
+              </p>
+            </div>
+          </Band>
         </div>
-    )
+      </section>
+
+      {/* ---------------------------------------------------------- værdien */}
+      <section className="u-wrap u-gutter u-section-pad">
+        <Band>
+          <h2 className="u-section-heading max-w-[20ch]">Hvad du får ud af det.</h2>
+        </Band>
+
+        <div className="mt-14 grid gap-x-14 gap-y-11 md:grid-cols-2">
+          {VAERDI.map((v) => (
+            <Band key={v.navn}>
+              <div>
+                <h3 className="text-[20px] leading-[1.25]">{v.navn}</h3>
+                <p className="mt-3 text-[15.5px] leading-[1.6] text-ink-soft">{v.tekst}</p>
+              </div>
+            </Band>
+          ))}
+        </div>
+      </section>
+
+      {/* ------------------------------------------------------------- trin */}
+      <section className="bg-sunk">
+        <div className="u-wrap u-gutter u-section-pad">
+          <Band>
+            <h2 className="u-section-heading max-w-[18ch]">Tre trin, og linket er i luften.</h2>
+          </Band>
+
+          {/* Nummereringen staar der, fordi det FAKTISK er en raekkefoelge.
+              Ikke som pynt paa tre tilfaeldige punkter. */}
+          <ol className="mt-14 grid gap-y-10 md:grid-cols-3 md:gap-x-12">
+            {TRIN.map(([navn, tekst], i) => (
+              <Band key={navn}>
+                <li className="list-none">
+                  <p className="u-mono text-[13px] text-go">Trin {i + 1}</p>
+                  <h3 className="mt-3 text-[19px] leading-[1.25]">{navn}</h3>
+                  <p className="mt-3 text-[15.5px] leading-[1.6] text-ink-soft">{tekst}</p>
+                </li>
+              </Band>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* ------------------------------------------------------------- api */}
+      <section className="u-wrap u-gutter u-section-pad">
+        <div className="grid gap-12 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:items-center lg:gap-20">
+          <Band>
+            <div>
+              <p className="u-label">For udviklere</p>
+              <h2 className="u-section-heading mt-5 max-w-[16ch]">Eller helt uden om siden.</h2>
+              <p className="u-measure mt-6 text-ink-soft">
+                Samme funktioner over HTTP med en nøgle fra din profil. Læg det ind i dit CMS,
+                dit nyhedsbrev eller din egen kode.
+              </p>
+              <Link to="/docs" className="u-link mt-7 inline-block text-[15.5px] text-go">
+                Læs dokumentationen
+              </Link>
+            </div>
+          </Band>
+
+          <Band className="min-w-0">
+            <div className="overflow-x-auto rounded-[7px] border border-edge bg-surface p-6 sm:p-8">
+              <pre className="u-mono text-[12.5px] leading-[1.85] text-ink-soft sm:text-[13px]">
+{`curl -X POST https://shr.dk/api/urls/shorten \\
+  -H "Authorization: Bearer $NOEGLE" \\
+  -H "Content-Type: application/json" \\
+  -d '{"originalUrl":"https://...","custom_alias":"okt26"}'
+
+{
+  "short_code": "okt26",
+  "short_url": "https://shr.dk/okt26"
+}`}
+              </pre>
+            </div>
+          </Band>
+        </div>
+      </section>
+
+      {/* ---------------------------------------------------------- slutning */}
+      <section className="bg-sunk">
+        <div className="u-wrap u-gutter u-section-pad">
+          <Band>
+            <h2 className="u-section-heading max-w-[17ch]">Kom i gang med det samme.</h2>
+          </Band>
+          <Band>
+            <p className="u-measure mt-6 text-ink-soft">
+              Log ind og lav dit første korte link. Har du ikke en konto endnu, opretter en
+              administrator den til dig.
+            </p>
+          </Band>
+          <Band className="mt-9">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <Link to="/login" className="u-btn w-full sm:w-auto">
+                Log ind
+              </Link>
+              <Link to="/docs" className="u-btn-ghost w-full sm:w-auto">
+                Se dokumentationen
+              </Link>
+            </div>
+          </Band>
+        </div>
+      </section>
+
+      <Footer />
+    </div>
+  )
 }

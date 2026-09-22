@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const pool = require('../Db')
 const bcrypt = require('bcrypt')
+const verifyAdmin = require('../middleware/adminAuth')
 
 function parseDevice(userAgent) {
     if (!userAgent) return 'Ukendt'
@@ -20,7 +21,7 @@ function parseReferrerHost(referrer) {
     }
 }
 
-// Opret kort link
+// Opret kort link. Alle med en konto.
 router.post('/shorten', async (req, res) => {
     const { originalUrl, custom_alias, expires_at, password } = req.body
     const user_id = req.userId
@@ -58,14 +59,23 @@ router.post('/shorten', async (req, res) => {
     }
 })
 
-// Hent brugerens links
+/**
+ * Hent alle links.
+ *
+ * Stien hedder stadig /my-links, fordi frontenden kalder den, men den
+ * returnerer nu hele registret. Ejerens navn foelger med: naar alle ser alt,
+ * skal man kunne se hvem der har lavet hvad.
+ */
 router.get('/my-links', async (req, res) => {
-    const user_id = req.userId
-
     try {
         const result = await pool.query(
-            'SELECT id, original_url, short_code, user_id, clicks, expires_at, custom_alias, created_at, (password_hash IS NOT NULL) as has_password FROM urls WHERE user_id = $1 ORDER BY created_at DESC',
-            [user_id]
+            `SELECT u.id, u.original_url, u.short_code, u.user_id, u.clicks,
+                    u.expires_at, u.custom_alias, u.created_at,
+                    (u.password_hash IS NOT NULL) AS has_password,
+                    b.navn AS ejer_navn
+             FROM urls u
+             LEFT JOIN users b ON b.id = u.user_id
+             ORDER BY u.created_at DESC`
         )
         res.json(result.rows)
     } catch (error) {
@@ -74,13 +84,23 @@ router.get('/my-links', async (req, res) => {
     }
 })
 
-// Slet link
+// Slet link. Sit eget, eller alt hvis man er administrator.
 router.delete('/delete/:id', async (req, res) => {
     const { id } = req.params
     const user_id = req.userId
 
     try {
-        await pool.query('DELETE FROM urls WHERE id = $1 AND user_id = $2', [id, user_id])
+        // En admin maa slette alt, en bruger kun sit eget. Uden det andet led
+        // svarede kaldet OK, selv naar det ikke ramte noget, og linket blev
+        // staaende, som om sletningen var gaaet igennem.
+        const adm = await pool.query('SELECT is_admin FROM users WHERE id = $1', [user_id])
+        const erAdmin = Boolean(adm.rows[0]?.is_admin)
+        const svar = erAdmin
+            ? await pool.query('DELETE FROM urls WHERE id = $1', [id])
+            : await pool.query('DELETE FROM urls WHERE id = $1 AND user_id = $2', [id, user_id])
+        if (svar.rowCount === 0) {
+            return res.status(403).json({ error: 'Du kan kun slette dine egne links.' })
+        }
         res.json({ message: 'Link deleted successfully' })
     } catch (error) {
         console.error('Error deleting link:', error)
@@ -89,20 +109,24 @@ router.delete('/delete/:id', async (req, res) => {
 })
 
 // Rediger link
+// Ret link. Sit eget, eller alt hvis man er administrator.
 router.patch('/:id', async (req, res) => {
     const { id } = req.params
     const user_id = req.userId
     const { original_url, custom_alias } = req.body
 
     try {
-        const check = await pool.query('SELECT id FROM urls WHERE id = $1 AND user_id = $2', [id, user_id])
+        const adm = await pool.query('SELECT is_admin FROM users WHERE id = $1', [user_id])
+        const check = adm.rows[0]?.is_admin
+            ? await pool.query('SELECT id FROM urls WHERE id = $1', [id])
+            : await pool.query('SELECT id FROM urls WHERE id = $1 AND user_id = $2', [id, user_id])
         if (check.rows.length === 0) {
             return res.status(404).json({ error: 'Link ikke fundet' })
         }
 
         const result = await pool.query(
-            'UPDATE urls SET original_url = COALESCE($1, original_url), short_code = COALESCE($2, short_code), custom_alias = COALESCE($2, custom_alias) WHERE id = $3 AND user_id = $4 RETURNING id, original_url, short_code, user_id, clicks, expires_at, custom_alias, created_at',
-            [original_url, custom_alias, id, user_id]
+            'UPDATE urls SET original_url = COALESCE($1, original_url), short_code = COALESCE($2, short_code), custom_alias = COALESCE($2, custom_alias) WHERE id = $3 RETURNING id, original_url, short_code, user_id, clicks, expires_at, custom_alias, created_at',
+            [original_url, custom_alias, id]
         )
         res.json(result.rows[0])
     } catch (error) {
@@ -120,7 +144,8 @@ router.get('/:id/stats', async (req, res) => {
     const user_id = req.userId
 
     try {
-        const check = await pool.query('SELECT id FROM urls WHERE id = $1 AND user_id = $2', [id, user_id])
+        // Ingen ejer-betingelse: statistik er en se-handling, og alle maa se links.
+        const check = await pool.query('SELECT id FROM urls WHERE id = $1', [id])
         if (check.rows.length === 0) {
             return res.status(404).json({ error: 'Link ikke fundet' })
         }

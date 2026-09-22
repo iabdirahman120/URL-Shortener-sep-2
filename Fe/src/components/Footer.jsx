@@ -1,49 +1,54 @@
 import { Link } from 'react-router-dom'
-import { Link2 } from 'lucide-react'
+
+/**
+ * Footeren.
+ *
+ * To grupper og en bundlinje. Ikke fire spalter med ét link i hver, som er
+ * et gitter der laader som om der er mere indhold, end der er.
+ */
+const GRUPPER = [
+  ['Produkt', [['Sådan virker det', '/'], ['API', '/docs'], ['Log ind', '/login']]],
+  ['Juridisk', [['Privatlivspolitik', '/privacy'], ['Betingelser', '/terms']]],
+]
 
 export function Footer() {
-    return (
-        <footer className="border-t bg-background py-10 px-6 mt-auto">
-            <div className="max-w-5xl mx-auto">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
-                    <div className="col-span-2 md:col-span-1">
-                        <div className="flex items-center gap-2 font-bold text-foreground mb-3">
-                            <Link2 className="w-4 h-4 text-primary" />
-                            shr.dk
-                        </div>
-                        <p className="text-xs text-muted-foreground leading-relaxed">
-                            Hurtig og gratis URL-forkortning med klik-statistik, QR-koder og API-adgang.
-                        </p>
-                    </div>
-                    <div>
-                        <p className="text-xs font-semibold text-foreground uppercase tracking-wide mb-3">Produkt</p>
-                        <ul className="space-y-2 text-sm text-muted-foreground">
-                            <li><a href="/#funktioner" className="hover:text-foreground transition-colors">Funktioner</a></li>
-                            <li><a href="/#priser" className="hover:text-foreground transition-colors">Priser</a></li>
-                            <li><Link to="/docs" className="hover:text-foreground transition-colors">API-docs</Link></li>
-                        </ul>
-                    </div>
-                    <div>
-                        <p className="text-xs font-semibold text-foreground uppercase tracking-wide mb-3">Konto</p>
-                        <ul className="space-y-2 text-sm text-muted-foreground">
-                            <li><Link to="/login" className="hover:text-foreground transition-colors">Log ind</Link></li>
-                            <li><Link to="/register" className="hover:text-foreground transition-colors">Opret konto</Link></li>
-                            <li><Link to="/dashboard" className="hover:text-foreground transition-colors">Dashboard</Link></li>
-                        </ul>
-                    </div>
-                    <div>
-                        <p className="text-xs font-semibold text-foreground uppercase tracking-wide mb-3">Juridisk</p>
-                        <ul className="space-y-2 text-sm text-muted-foreground">
-                            <li><Link to="/privacy" className="hover:text-foreground transition-colors">Privatlivspolitik</Link></li>
-                            <li><Link to="/terms" className="hover:text-foreground transition-colors">Vilkår og betingelser</Link></li>
-                        </ul>
-                    </div>
-                </div>
-                <div className="border-t pt-6 flex flex-col md:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
-                    <p>© {new Date().getFullYear()} shr.dk — Alle rettigheder forbeholdes</p>
-                    <p>Lavet med ❤️ i Danmark</p>
-                </div>
-            </div>
-        </footer>
-    )
+  const aar = new Date().getFullYear()
+
+  return (
+    <footer className="border-t border-edge bg-paper">
+      <div className="u-wrap u-gutter grid gap-12 py-16 md:grid-cols-[1.4fr_1fr_1fr]">
+        <div>
+          <span className="u-mono text-[17px] font-medium tracking-tight text-ink">
+            shr<span className="text-ink-faint">.dk</span>
+          </span>
+          <p className="mt-4 max-w-[34ch] text-[15px] leading-[1.6] text-ink-soft">
+            Korte links med klikstatistik, QR-koder og udløbsdato. Dansk domæne, dansk
+            hosting og ingen sporing af dine besøgende ud over det, du selv kan se.
+          </p>
+        </div>
+
+        {GRUPPER.map(([titel, links]) => (
+          <nav key={titel} aria-label={titel}>
+            <p className="u-label">{titel}</p>
+            <ul className="mt-5 flex flex-col gap-3">
+              {links.map(([navn, sti]) => (
+                <li key={navn + sti}>
+                  <Link to={sti} className="u-link text-[15px]">
+                    {navn}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        ))}
+      </div>
+
+      <div className="border-t border-edge-soft">
+        <div className="u-wrap u-gutter flex flex-wrap items-center justify-between gap-4 py-7">
+          <p className="u-mono text-[12.5px] text-ink-faint">© {aar} shr.dk</p>
+          <p className="u-mono text-[12.5px] text-ink-faint">Drevet i Danmark</p>
+        </div>
+      </div>
+    </footer>
+  )
 }

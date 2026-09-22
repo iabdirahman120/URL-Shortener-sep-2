@@ -1,87 +1,112 @@
+import { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { Button } from '@/components/ui/button'
-import { Link2, ShieldCheck, Moon, Sun } from 'lucide-react'
-import { useState, useEffect } from 'react'
 
+/**
+ * Navbaren.
+ *
+ * Reglen bag hver linje: **hvert element i baren er én linje tekst.** Ingen
+ * ikoner ved siden af ord, ingen knapper i tre forskellige hoejder. Da de fire
+ * ting havde hver sin hoejde, centrerede `items-center` kasserne og ikke
+ * teksten i dem, og saa sad de paa fire forskellige linjer.
+ *
+ * Temaskifteren er vaek. Siden har ét udtryk, og det er det moerke. En
+ * knap, der laver om paa hele paletten, er en indstilling, ingen bad om, og
+ * den dobbelte palette var halvdelen af den gamle CSS.
+ */
 export function Navbar() {
-    const navigate = useNavigate()
-    const location = useLocation()
-    const token = localStorage.getItem('token')
-    const isAdmin = localStorage.getItem('is_admin') === 'true'
-    const [dark, setDark] = useState(() => document.documentElement.classList.contains('dark'))
+  const navigate = useNavigate()
+  const location = useLocation()
+  const [aaben, setAaben] = useState(false)
 
-    useEffect(() => {
-        if (dark) {
-            document.documentElement.classList.add('dark')
-            localStorage.setItem('theme', 'dark')
-        } else {
-            document.documentElement.classList.remove('dark')
-            localStorage.setItem('theme', 'light')
-        }
-    }, [dark])
+  const token = localStorage.getItem('token')
+  const erAdmin = localStorage.getItem('is_admin') === 'true'
+  const her = (sti) => location.pathname === sti
 
-    const handleLogout = () => {
-        localStorage.removeItem('token')
-        localStorage.removeItem('is_admin')
-        navigate('/')
-    }
+  const logUd = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('is_admin')
+    navigate('/')
+  }
 
-    const isActive = (path) => location.pathname === path
+  /* Punkter der kraever en konto. Admin har ét ekstra. */
+  const punkter = token
+    ? [
+        ['Links', '/dashboard'],
+        ...(erAdmin ? [['Brugere', '/admin']] : []),
+        ['API', '/docs'],
+        ['Profil', '/settings'],
+      ]
+    : [['API', '/docs']]
 
-    return (
-        <nav className="border-b bg-background/95 backdrop-blur sticky top-0 z-50">
-            <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
-                <Link to="/" className="flex items-center gap-2 font-bold text-lg text-foreground">
-                    <Link2 className="w-5 h-5 text-primary" />
-                    shr.dk
-                </Link>
+  return (
+    <header className="sticky top-0 z-50 border-b border-edge bg-paper/85 backdrop-blur-sm">
+      <div className="u-wrap u-gutter flex h-[68px] items-center gap-6">
+        {/* Maerket. Selve koden staar i mono, fordi det er en kode. */}
+        <Link to="/" className="shrink-0 leading-none" aria-label="shr.dk, forside">
+          <span className="u-mono text-[17px] font-medium tracking-tight text-ink">
+            shr<span className="text-ink-faint">.dk</span>
+          </span>
+        </Link>
 
-                <div className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
-                    <a href="/#funktioner" className="hover:text-foreground transition-colors">Funktioner</a>
-                    <a href="/#priser" className="hover:text-foreground transition-colors">Priser</a>
-                    <Link to="/docs" className={`hover:text-foreground transition-colors ${isActive('/docs') ? 'text-foreground font-medium' : ''}`}>
-                        API
-                    </Link>
-                </div>
-
-                <div className="flex items-center gap-2">
-                    <button
-                        onClick={() => setDark(d => !d)}
-                        className="w-8 h-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                        title={dark ? 'Lys tilstand' : 'Mørk tilstand'}
-                    >
-                        {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-                    </button>
-
-                    {token ? (
-                        <>
-                            {isAdmin && (
-                                <Link to="/admin">
-                                    <Button variant={isActive('/admin') ? 'default' : 'ghost'} size="sm" className="gap-1.5">
-                                        <ShieldCheck className="w-3.5 h-3.5" />
-                                        Admin
-                                    </Button>
-                                </Link>
-                            )}
-                            <Link to="/dashboard">
-                                <Button variant={isActive('/dashboard') ? 'default' : 'ghost'} size="sm">
-                                    Dashboard
-                                </Button>
-                            </Link>
-                            <Link to="/settings">
-                                <Button variant={isActive('/settings') ? 'default' : 'ghost'} size="sm">
-                                    Indstillinger
-                                </Button>
-                            </Link>
-                            <Button size="sm" variant="outline" onClick={handleLogout}>Log ud</Button>
-                        </>
-                    ) : (
-                        <Link to="/login">
-                            <Button size="sm">Log ind</Button>
-                        </Link>
-                    )}
-                </div>
-            </div>
+        <nav className="ml-auto hidden items-center gap-7 sm:flex" aria-label="Hovedmenu">
+          {punkter.map(([navn, sti]) => (
+            <Link
+              key={sti}
+              to={sti}
+              className={`u-link whitespace-nowrap text-[14.5px] leading-none ${
+                her(sti) ? 'text-ink' : ''
+              }`}
+            >
+              {navn}
+            </Link>
+          ))}
+          {token ? (
+            <button onClick={logUd} className="u-link text-[14.5px] leading-none">
+              Log ud
+            </button>
+          ) : (
+            <Link to="/login" className="u-btn !min-h-[38px] !px-5 !text-[14.5px]">
+              Log ind
+            </Link>
+          )}
         </nav>
-    )
+
+        {/* Under 640px bliver menuen til én knap. Fire punkter i en 360px bred
+            bar giver enten sammenkrøllede ord eller vandret rul. */}
+        <button
+          onClick={() => setAaben((v) => !v)}
+          className="u-mono ml-auto text-[13px] uppercase tracking-[0.12em] text-ink-soft sm:hidden"
+          aria-expanded={aaben}
+        >
+          {aaben ? 'Luk' : 'Menu'}
+        </button>
+      </div>
+
+      {aaben && (
+        <div className="border-t border-edge sm:hidden">
+          <nav className="u-wrap u-gutter flex flex-col gap-1 py-4" aria-label="Menu">
+            {punkter.map(([navn, sti]) => (
+              <Link
+                key={sti}
+                to={sti}
+                onClick={() => setAaben(false)}
+                className="py-2.5 text-[16px] text-ink-soft transition-colors hover:text-ink"
+              >
+                {navn}
+              </Link>
+            ))}
+            {token ? (
+              <button onClick={logUd} className="py-2.5 text-left text-[16px] text-ink-soft">
+                Log ud
+              </button>
+            ) : (
+              <Link to="/login" onClick={() => setAaben(false)} className="u-btn mt-3">
+                Log ind
+              </Link>
+            )}
+          </nav>
+        </div>
+      )}
+    </header>
+  )
 }
