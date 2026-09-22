@@ -28,7 +28,7 @@ export default function Privacy() {
                         <li><strong>Kontooplysninger:</strong> Navn, email og krypteret adgangskode ved oprettelse af konto.</li>
                         <li><strong>Link-data:</strong> De URL'er du forkorter, herunder custom alias og udløbsdato.</li>
                         <li><strong>Klik-statistik:</strong> Tidspunkt for klik, referrer (hvorfra besøgeren kom) og user-agent (enhedstype).</li>
-                        <li><strong>Betalingsdata:</strong> Faktureringsoplysninger ved Pro-abonnement behandles af Stripe — vi opbevarer ikke kortdata.</li>
+                        <li><strong>Betalingsdata:</strong> Faktureringsoplysninger ved Pro-abonnement behandles af Stripe. Vi opbevarer ikke kortdata.</li>
                     </ul>
                 </Section>
 

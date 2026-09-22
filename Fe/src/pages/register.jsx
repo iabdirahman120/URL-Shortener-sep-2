@@ -53,7 +53,7 @@ export default function Register() {
                 <Card className="w-full max-w-sm">
                     <CardHeader className="text-center">
                         <CardTitle className="text-2xl">Opret konto</CardTitle>
-                        <CardDescription>Gratis — ingen kreditkort påkrævet</CardDescription>
+                        <CardDescription>Kontakt en administrator for at få en konto</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <form className="space-y-4" onSubmit={handleSubmit}>

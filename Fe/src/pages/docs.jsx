@@ -45,7 +45,7 @@ function Endpoint({ method, path, description, request, response }) {
 
 export default function Docs() {
     useSEO(
-        'API-dokumentation — shr.dk',
+        'API-dokumentation | shr.dk',
         'REST API til shr.dk: forkort URLs programmatisk, hent statistik og administrer links. Autentificér med Bearer-token eller API-nøgle. Alle endpoints returnerer JSON.'
     )
     return (

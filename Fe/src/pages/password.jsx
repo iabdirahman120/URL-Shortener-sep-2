@@ -33,7 +33,7 @@ export default function PasswordPage() {
 
             window.location.href = data.redirect_url
         } catch {
-            setError('Netværksfejl — prøv igen')
+            setError('Der er ingen forbindelse. Prøv igen om lidt.')
             setLoading(false)
         }
     }

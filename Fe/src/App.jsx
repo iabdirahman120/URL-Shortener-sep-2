@@ -17,7 +17,7 @@ function App() {
     <Routes>
       <Route path="/" element={<Forside />} />
       <Route path="/login" element={<Login />} />
-      {/* Offentlig registrering er lukket — kun admin opretter brugere. Send til login. */}
+      {/* Offentlig registrering er lukket. Kun admin opretter brugere, saa der sendes til login. */}
       <Route path="/register" element={<Navigate to="/login" replace />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/settings" element={<Settings />} />

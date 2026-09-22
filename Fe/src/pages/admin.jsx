@@ -276,7 +276,7 @@ export default function Admin() {
                                                         {l.original_url.replace(/^https?:\/\//, '')}
                                                     </span>
                                                 </td>
-                                                <td className="px-6 py-3 text-muted-foreground">{l.user_email || '—'}</td>
+                                                <td className="px-6 py-3 text-muted-foreground">{l.user_email || 'ingen'}</td>
                                                 <td className="px-6 py-3 font-semibold text-foreground">{l.clicks}</td>
                                                 <td className="px-6 py-3 text-muted-foreground text-xs">
                                                     {new Date(l.created_at).toLocaleDateString('da-DK')}
