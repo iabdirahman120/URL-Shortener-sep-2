@@ -74,13 +74,13 @@ export default function Admin() {
     }
 
     return (
-        <div className="min-h-screen flex flex-col bg-background">
+        <div className="min-h-screen flex flex-col bg-surface">
             <Navbar />
             <div className="max-w-6xl mx-auto w-full px-6 py-8 flex flex-col gap-6">
 
                 <div>
-                    <h1 className="text-2xl font-bold text-foreground">Admin panel</h1>
-                    <p className="text-sm text-muted-foreground mt-1">Overblik over alle brugere og links</p>
+                    <h1 className="text-2xl font-bold text-ink">Admin panel</h1>
+                    <p className="text-sm text-ink-soft mt-1">Overblik over alle brugere og links</p>
                 </div>
 
                 {/* Stats */}
@@ -92,8 +92,8 @@ export default function Admin() {
                                     <Users className="w-5 h-5 text-primary" />
                                 </div>
                                 <div>
-                                    <p className="text-2xl font-bold text-foreground">{stats.total_users}</p>
-                                    <p className="text-xs text-muted-foreground">Brugere i alt</p>
+                                    <p className="text-2xl font-bold text-ink">{stats.total_users}</p>
+                                    <p className="text-xs text-ink-soft">Brugere i alt</p>
                                 </div>
                             </CardContent>
                         </Card>
@@ -103,8 +103,8 @@ export default function Admin() {
                                     <Link2 className="w-5 h-5 text-primary" />
                                 </div>
                                 <div>
-                                    <p className="text-2xl font-bold text-foreground">{stats.total_links}</p>
-                                    <p className="text-xs text-muted-foreground">Links i alt</p>
+                                    <p className="text-2xl font-bold text-ink">{stats.total_links}</p>
+                                    <p className="text-xs text-ink-soft">Links i alt</p>
                                 </div>
                             </CardContent>
                         </Card>
@@ -114,8 +114,8 @@ export default function Admin() {
                                     <MousePointerClick className="w-5 h-5 text-primary" />
                                 </div>
                                 <div>
-                                    <p className="text-2xl font-bold text-foreground">{stats.total_clicks}</p>
-                                    <p className="text-xs text-muted-foreground">Klik i alt</p>
+                                    <p className="text-2xl font-bold text-ink">{stats.total_clicks}</p>
+                                    <p className="text-xs text-ink-soft">Klik i alt</p>
                                 </div>
                             </CardContent>
                         </Card>
@@ -131,7 +131,7 @@ export default function Admin() {
                             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors -mb-px ${
                                 tab === t
                                     ? 'border-primary text-primary'
-                                    : 'border-transparent text-muted-foreground hover:text-foreground'
+                                    : 'border-transparent text-ink-soft hover:text-ink'
                             }`}
                         >
                             {t === 'users' ? `Brugere (${users.length})` : `Links (${links.length})`}
@@ -140,7 +140,7 @@ export default function Admin() {
                 </div>
 
                 {loading ? (
-                    <div className="text-sm text-muted-foreground py-10 text-center">Henter data...</div>
+                    <div className="text-sm text-ink-soft py-10 text-center">Henter data...</div>
                 ) : tab === 'users' ? (
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between">
@@ -153,24 +153,44 @@ export default function Admin() {
                         {showCreate && (
                             <CardContent className="border-b pb-5">
                                 <form onSubmit={createUser} className="flex flex-col gap-3 max-w-md">
-                                    <input className="border rounded-md px-3 py-2 text-sm bg-background" placeholder="Navn"
+                                    <input className="border rounded-md px-3 py-2 text-sm bg-surface" placeholder="Navn"
                                         value={form.navn} onChange={e => setForm({ ...form, navn: e.target.value })} />
-                                    <input className="border rounded-md px-3 py-2 text-sm bg-background" type="email" placeholder="Email" required
+                                    <input className="border rounded-md px-3 py-2 text-sm bg-surface" type="email" placeholder="Email" required
                                         value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
-                                    <input className="border rounded-md px-3 py-2 text-sm bg-background" type="text" placeholder="Adgangskode (standard: 123)"
+                                    <input className="border rounded-md px-3 py-2 text-sm bg-surface" type="text" placeholder="Adgangskode (standard: 123)"
                                         value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
-                                    <p className="text-xs text-muted-foreground -mt-1">Lad stå tom for standard-koden <strong>123</strong>. Brugeren kan selv skifte den bagefter.</p>
-                                    <div className="flex gap-4 text-sm">
-                                        <label className="flex items-center gap-2">
-                                            <input type="checkbox" checked={form.is_pro} onChange={e => setForm({ ...form, is_pro: e.target.checked })} />
-                                            Pro
-                                        </label>
-                                        <label className="flex items-center gap-2">
-                                            <input type="checkbox" checked={form.is_admin} onChange={e => setForm({ ...form, is_admin: e.target.checked })} />
-                                            Admin
-                                        </label>
+                                    <p className="text-xs text-ink-soft -mt-1">Lad stå tom for standard-koden <strong>123</strong>. Brugeren kan selv skifte den bagefter.</p>
+                                    <div>
+                                        <p className="u-label">Rolle</p>
+                                        {/* Tre valg, hvor én altid er valgt. To afkrydsningsfelter gav
+                                            kombinationer uden mening: en admin har adgang til alt
+                                            uanset, om Pro ogsaa er sat. */}
+                                        <div className="mt-3 inline-flex flex-wrap rounded-[5px] border border-edge p-1" role="radiogroup" aria-label="Rolle">
+                                            {[
+                                                ['gratis', 'Gratis', { is_pro: false, is_admin: false }],
+                                                ['pro', 'Pro', { is_pro: true, is_admin: false }],
+                                                ['admin', 'Admin', { is_pro: true, is_admin: true }],
+                                            ].map(([noegle, navn, vaerdier]) => {
+                                                const valgt = form.is_admin ? noegle === 'admin'
+                                                    : form.is_pro ? noegle === 'pro' : noegle === 'gratis'
+                                                return (
+                                                    <button key={noegle} type="button" role="radio" aria-checked={valgt}
+                                                        onClick={() => setForm({ ...form, ...vaerdier })}
+                                                        className={`rounded-[3px] px-4 py-2 text-[13.5px] transition-colors ${
+                                                            valgt ? 'bg-go text-white' : 'text-ink-soft hover:text-ink'
+                                                        }`}>
+                                                        {navn}
+                                                    </button>
+                                                )
+                                            })}
+                                        </div>
+                                        <p className="mt-3 text-[13.5px] leading-[1.5] text-ink-faint">
+                                            {form.is_admin ? 'Kan oprette og slette brugere, og kan slette alle links.'
+                                                : form.is_pro ? 'Almindelig bruger med Pro. Opretter links og ser hele registret.'
+                                                : 'Almindelig bruger. Opretter links og ser hele registret.'}
+                                        </p>
                                     </div>
-                                    {createError && <p className="text-sm text-destructive">{createError}</p>}
+                                    {createError && <p className="text-sm text-rust">{createError}</p>}
                                     <div className="flex gap-2">
                                         <Button type="submit" size="sm" disabled={creating}>{creating ? 'Opretter...' : 'Opret bruger'}</Button>
                                         <Button type="button" size="sm" variant="ghost" onClick={() => { setShowCreate(false); setCreateError('') }}>Annuller</Button>
@@ -182,7 +202,7 @@ export default function Admin() {
                             <div className="overflow-x-auto">
                                 <table className="w-full text-sm">
                                     <thead>
-                                        <tr className="border-b text-muted-foreground text-xs">
+                                        <tr className="border-b text-ink-soft text-xs">
                                             <th className="text-left px-6 py-3 font-medium">Navn</th>
                                             <th className="text-left px-6 py-3 font-medium">Email</th>
                                             <th className="text-left px-6 py-3 font-medium">Plan</th>
@@ -194,22 +214,22 @@ export default function Admin() {
                                     </thead>
                                     <tbody>
                                         {users.map(u => (
-                                            <tr key={u.id} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
-                                                <td className="px-6 py-3 font-medium text-foreground">{u.navn}</td>
-                                                <td className="px-6 py-3 text-muted-foreground">{u.email}</td>
+                                            <tr key={u.id} className="border-b last:border-0 hover:bg-sunk/30 transition-colors">
+                                                <td className="px-6 py-3 font-medium text-ink">{u.navn}</td>
+                                                <td className="px-6 py-3 text-ink-soft">{u.email}</td>
                                                 <td className="px-6 py-3">
                                                     <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${
                                                         u.is_pro
                                                             ? 'bg-primary text-primary-foreground'
-                                                            : 'bg-muted text-muted-foreground'
+                                                            : 'bg-muted text-ink-soft'
                                                     }`}>
                                                         {u.is_pro && <Crown className="w-3 h-3" />}
                                                         {u.is_pro ? 'Pro' : 'Gratis'}
                                                     </span>
                                                 </td>
-                                                <td className="px-6 py-3 text-foreground">{u.link_count}</td>
-                                                <td className="px-6 py-3 text-foreground">{u.total_clicks}</td>
-                                                <td className="px-6 py-3 text-muted-foreground text-xs">
+                                                <td className="px-6 py-3 text-ink">{u.link_count}</td>
+                                                <td className="px-6 py-3 text-ink">{u.total_clicks}</td>
+                                                <td className="px-6 py-3 text-ink-soft text-xs">
                                                     {new Date(u.created_at).toLocaleDateString('da-DK')}
                                                 </td>
                                                 <td className="px-6 py-3">
@@ -225,7 +245,7 @@ export default function Admin() {
                                                         {!u.is_admin && (
                                                             <button
                                                                 onClick={() => deleteUser(u.id)}
-                                                                className="text-muted-foreground hover:text-destructive transition-colors"
+                                                                className="text-ink-soft hover:text-rust transition-colors"
                                                             >
                                                                 <Trash2 className="w-4 h-4" />
                                                             </button>
@@ -248,7 +268,7 @@ export default function Admin() {
                             <div className="overflow-x-auto">
                                 <table className="w-full text-sm">
                                     <thead>
-                                        <tr className="border-b text-muted-foreground text-xs">
+                                        <tr className="border-b text-ink-soft text-xs">
                                             <th className="text-left px-6 py-3 font-medium">Kort link</th>
                                             <th className="text-left px-6 py-3 font-medium">Original URL</th>
                                             <th className="text-left px-6 py-3 font-medium">Bruger</th>
@@ -259,7 +279,7 @@ export default function Admin() {
                                     </thead>
                                     <tbody>
                                         {links.map(l => (
-                                            <tr key={l.id} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
+                                            <tr key={l.id} className="border-b last:border-0 hover:bg-sunk/30 transition-colors">
                                                 <td className="px-6 py-3">
                                                     <a
                                                         href={`https://shr.dk/r/${l.short_code}`}
@@ -272,19 +292,19 @@ export default function Admin() {
                                                     </a>
                                                 </td>
                                                 <td className="px-6 py-3 max-w-[250px]">
-                                                    <span className="truncate block text-muted-foreground" title={l.original_url}>
+                                                    <span className="truncate block text-ink-soft" title={l.original_url}>
                                                         {l.original_url.replace(/^https?:\/\//, '')}
                                                     </span>
                                                 </td>
-                                                <td className="px-6 py-3 text-muted-foreground">{l.user_email || 'ingen'}</td>
-                                                <td className="px-6 py-3 font-semibold text-foreground">{l.clicks}</td>
-                                                <td className="px-6 py-3 text-muted-foreground text-xs">
+                                                <td className="px-6 py-3 text-ink-soft">{l.user_email || 'ingen'}</td>
+                                                <td className="px-6 py-3 font-semibold text-ink">{l.clicks}</td>
+                                                <td className="px-6 py-3 text-ink-soft text-xs">
                                                     {new Date(l.created_at).toLocaleDateString('da-DK')}
                                                 </td>
                                                 <td className="px-6 py-3">
                                                     <button
                                                         onClick={() => deleteLink(l.id)}
-                                                        className="text-muted-foreground hover:text-destructive transition-colors"
+                                                        className="text-ink-soft hover:text-rust transition-colors"
                                                     >
                                                         <Trash2 className="w-4 h-4" />
                                                     </button>

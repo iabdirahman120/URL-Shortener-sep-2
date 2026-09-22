@@ -260,7 +260,7 @@ export default function Dashboard() {
   // kontrollerer ejerskabet uanset hvad browseren paastaar.
   const minId = (() => {
     try {
-      return JSON.parse(atob((token || '').split('.')[1] || '')).id ?? null
+      return JSON.parse(atob((token || '').split('.')[1] || '')).userId ?? null
     } catch {
       return null
     }
